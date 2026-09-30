@@ -1,16 +1,20 @@
-import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import di.appModule
-import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 import ui.DynamisApp
+import ui.theme.DynamisTheme
 
 @Composable
-@Preview
 fun App() {
     KoinApplication(application = {
         modules(appModule())
     }) {
-        DynamisApp()
+        DynamisTheme {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                DynamisApp()
+            }
+        }
     }
 }

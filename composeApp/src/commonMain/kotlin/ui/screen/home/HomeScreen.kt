@@ -1,46 +1,58 @@
 package ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import dynamis.composeapp.generated.resources.Res
 import dynamis.composeapp.generated.resources.current_location
+import dynamis.composeapp.generated.resources.high_temperature
 import dynamis.composeapp.generated.resources.loading_weather
 import dynamis.composeapp.generated.resources.location_permission_denied
 import dynamis.composeapp.generated.resources.location_permission_denied_forever
 import dynamis.composeapp.generated.resources.location_unavailable
+import dynamis.composeapp.generated.resources.low_temperature
+import dynamis.composeapp.generated.resources.refresh_weather
 import dynamis.composeapp.generated.resources.retry
 import dynamis.composeapp.generated.resources.weather_unavailable
 import org.jetbrains.compose.resources.stringResource
+import ui.theme.DynamisTheme
 
 @Composable
 fun HomeScreen(
@@ -48,43 +60,30 @@ fun HomeScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val weather = (state as? HomeUiState.Success)?.weather ?: WeatherUiState()
-    val isShowing = state is HomeUiState.Success
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        weather.backgroundGradient.first,
-                        weather.backgroundGradient.second
-                    )
-                )
-            )
+        modifier = modifier.fillMaxSize().background(
+            Brush.verticalGradient(
+                listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.background),
+            ),
+        ),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        val transitionState = remember { MutableTransitionState(isShowing) }
-        transitionState.targetState = isShowing
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
+                .widthIn(max = 600.dp).fillMaxWidth()
+                .verticalScroll(rememberScrollState()).padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    Icons.Rounded.LocationOn,
-                    contentDescription = "Location",
-                    modifier = Modifier
-                        .size(64.dp)
-                        .align(Alignment.CenterVertically)
-                        .padding(8.dp)
-                )
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    modifier = Modifier
-                        .size(64.dp)
-                        .align(Alignment.CenterVertically)
-                        .padding(8.dp)
-                )
+                Icon(Icons.Rounded.LocationOn, contentDescription = null, modifier = Modifier.size(32.dp))
+                IconButton(onClick = onRetry, enabled = state is HomeUiState.Success) {
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh_weather))
+                }
             }
             when (state) {
                 HomeUiState.Loading -> {
@@ -98,68 +97,78 @@ fun HomeScreen(
                         HomeError.LocationUnavailable -> Res.string.location_unavailable
                         HomeError.WeatherUnavailable -> Res.string.weather_unavailable
                     }
-                    Text(stringResource(message), modifier = Modifier.padding(16.dp))
+                    Text(stringResource(message), textAlign = TextAlign.Center)
                     Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
                 }
                 is HomeUiState.Success -> Unit
             }
             AnimatedVisibility(
-                visibleState = transitionState,
-                enter = slideInVertically(
-                    animationSpec = tween(durationMillis = 500),
-                    initialOffsetY = { fullHeight -> fullHeight }) + fadeIn(
-                    animationSpec = tween(durationMillis = 500)
-                ),
-                exit = fadeOut(animationSpec = tween(durationMillis = 500))
+                visible = state is HomeUiState.Success,
+                enter = slideInVertically(tween(500)) { it } + fadeIn(tween(500)),
             ) {
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = weather.locality.ifBlank { stringResource(Res.string.current_location) },
-                        style = MaterialTheme.typography.body1
-                    )
-                    Text(
-                        text = weather.time,
-                        style = MaterialTheme.typography.caption
-
-                    )
-                    Text(
-                        text = weather.currentTemperature,
-                        style = MaterialTheme.typography.h1
-                    )
-                    Row(modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.KeyboardArrowUp,
-                                "high temperature"
-                            )
-                            Text(weather.todayHigh)
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.KeyboardArrowDown,
-                                "low temperature"
-                            )
-                            Text(weather.todayLow)
-                        }
-                    }
-                }
+                if (state is HomeUiState.Success) WeatherContent(state.weather)
             }
         }
     }
 }
 
+@Composable
+private fun WeatherContent(weather: WeatherUiState) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            weather.locality.ifBlank { stringResource(Res.string.current_location) },
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
+        Text(weather.time, style = MaterialTheme.typography.labelMedium)
+        Text(weather.currentTemperature, style = MaterialTheme.typography.displayLarge)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+            TemperatureReading(
+                weather.todayHigh, Icons.Default.KeyboardArrowUp,
+                stringResource(Res.string.high_temperature, weather.todayHigh),
+            )
+            TemperatureReading(
+                weather.todayLow, Icons.Default.KeyboardArrowDown,
+                stringResource(Res.string.low_temperature, weather.todayLow),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TemperatureReading(value: String, icon: ImageVector, description: String) {
+    Row(
+        modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = description },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = null)
+        Text(value)
+    }
+}
+
+private val PreviewWeather = WeatherUiState(
+    locality = "San Francisco, California", time = "14:30",
+    currentTemperature = "18°C", todayHigh = "22°C", todayLow = "12°C",
+)
+
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen(
-            state = HomeUiState.Success(WeatherUiState(locality = "San Francisco, California", currentTemperature = "18°C")),
-            onRetry = {},
-        )
-    }
+    DynamisTheme { HomeScreen(HomeUiState.Success(PreviewWeather), onRetry = {}) }
+}
+
+@Preview
+@Composable
+private fun HomeScreenDarkPreview() {
+    DynamisTheme(darkTheme = true) { HomeScreen(HomeUiState.Success(PreviewWeather), onRetry = {}) }
+}
+
+@Preview
+@Composable
+private fun HomeScreenErrorPreview() {
+    DynamisTheme { HomeScreen(HomeUiState.Error(HomeError.PermissionDenied), onRetry = {}) }
 }

@@ -2,6 +2,9 @@
     <string name="home_screen">Home Screen</string>
     <string name="loading_weather">Loading weather…</string>
     <string name="retry">Try again</string>
+    <string name="refresh_weather">Refresh weather</string>
+    <string name="high_temperature">High temperature: %1$s</string>
+    <string name="low_temperature">Low temperature: %1$s</string>
     <string name="current_location">Current location</string>
     <string name="location_permission_denied">Allow location access to see the weather near you.</string>
     <string name="location_permission_denied_forever">Enable location access for Dynamis in your device settings, then try again.</string>
