@@ -1,7 +1,7 @@
 package di
 
 import data.repo.DefaultWeatherRepository
-import data.source.api.ApiServiceImpl
+import data.source.api.KtorWeatherApi
 import dev.jordond.compass.geocoder.Geocoder
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.MobileGeolocator
@@ -39,7 +39,7 @@ val providesHttpClient = module {
 }
 
 val providesApiService = module {
-    single<WeatherApi> { ApiServiceImpl(get()) }
+    single<WeatherApi> { KtorWeatherApi(get()) }
 }
 
 val providesRepository = module {

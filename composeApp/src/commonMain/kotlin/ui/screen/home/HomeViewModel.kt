@@ -9,12 +9,10 @@ import dev.jordond.compass.geocoder.placeOrNull
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.currentLocationOrNull
 import domain.WeatherRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -44,8 +42,8 @@ class HomeViewModel(
 
     private fun getWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            repository.getWeather(latitude, longitude).flowOn(Dispatchers.IO).collect { result ->
-                result.onSuccess { forecast ->
+            try {
+                    val forecast = repository.getWeather(latitude, longitude)
                     _weatherUiState.value = _weatherUiState.value.copy(
                         time = forecast.observedAt.time.toString(),
                         currentTemperature = forecast.temperature.format(forecast.temperatureUnit),
@@ -54,7 +52,10 @@ class HomeViewModel(
                         todayLow = forecast.todayLow.format(forecast.temperatureUnit),
                     )
                     _isShowing.value = true
-                }
+            } catch (cause: CancellationException) {
+                throw cause
+            } catch (cause: Exception) {
+                // Screen-level recovery is introduced with the unified UI state.
             }
         }
     }
