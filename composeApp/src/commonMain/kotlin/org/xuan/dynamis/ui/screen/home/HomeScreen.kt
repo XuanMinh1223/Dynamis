@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,12 +32,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.xuan.dynamis.resources.Res
 import org.xuan.dynamis.resources.current_location
@@ -52,7 +49,9 @@ import org.xuan.dynamis.resources.refresh_weather
 import org.xuan.dynamis.resources.retry
 import org.xuan.dynamis.resources.weather_unavailable
 import org.jetbrains.compose.resources.stringResource
-import org.xuan.dynamis.ui.theme.DynamisTheme
+import org.xuan.dynamis.ui.theme.TimeOfDay
+import org.xuan.dynamis.ui.theme.WeatherMeshGradientBackground
+import org.xuan.dynamis.ui.theme.WeatherPattern
 
 @Composable
 fun HomeScreen(
@@ -60,53 +59,53 @@ fun HomeScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier.fillMaxSize().background(
-            Brush.verticalGradient(
-                listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.background),
-            ),
-        ),
-        contentAlignment = Alignment.TopCenter,
+    val weather = (state as? HomeUiState.Success)?.weather
+    WeatherMeshGradientBackground(
+        pattern = weather?.weatherPattern ?: WeatherPattern.Unknown,
+        timeOfDay = weather?.timeOfDay ?: TimeOfDay.Day,
+        modifier = modifier,
     ) {
-        Column(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
-                .widthIn(max = 600.dp).fillMaxWidth()
-                .verticalScroll(rememberScrollState()).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            Column(
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
+                    .widthIn(max = 600.dp).fillMaxWidth()
+                    .verticalScroll(rememberScrollState()).padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(Icons.Rounded.LocationOn, contentDescription = null, modifier = Modifier.size(32.dp))
-                IconButton(onClick = onRetry, enabled = state is HomeUiState.Success) {
-                    Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh_weather))
-                }
-            }
-            when (state) {
-                HomeUiState.Loading -> {
-                    CircularProgressIndicator(Modifier.padding(16.dp))
-                    Text(stringResource(Res.string.loading_weather))
-                }
-                is HomeUiState.Error -> {
-                    val message = when (state.reason) {
-                        HomeError.PermissionDenied -> Res.string.location_permission_denied
-                        HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
-                        HomeError.LocationUnavailable -> Res.string.location_unavailable
-                        HomeError.WeatherUnavailable -> Res.string.weather_unavailable
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(Icons.Rounded.LocationOn, contentDescription = null, modifier = Modifier.size(32.dp))
+                    IconButton(onClick = onRetry, enabled = state is HomeUiState.Success) {
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh_weather))
                     }
-                    Text(stringResource(message), textAlign = TextAlign.Center)
-                    Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
                 }
-                is HomeUiState.Success -> Unit
-            }
-            AnimatedVisibility(
-                visible = state is HomeUiState.Success,
-                enter = slideInVertically(tween(500)) { it } + fadeIn(tween(500)),
-            ) {
-                if (state is HomeUiState.Success) WeatherContent(state.weather)
+                when (state) {
+                    HomeUiState.Loading -> {
+                        CircularProgressIndicator(Modifier.padding(16.dp))
+                        Text(stringResource(Res.string.loading_weather))
+                    }
+                    is HomeUiState.Error -> {
+                        val message = when (state.reason) {
+                            HomeError.PermissionDenied -> Res.string.location_permission_denied
+                            HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
+                            HomeError.LocationUnavailable -> Res.string.location_unavailable
+                            HomeError.WeatherUnavailable -> Res.string.weather_unavailable
+                        }
+                        Text(stringResource(message), textAlign = TextAlign.Center)
+                        Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+                    }
+                    is HomeUiState.Success -> Unit
+                }
+                AnimatedVisibility(
+                    visible = state is HomeUiState.Success,
+                    enter = slideInVertically(tween(500)) { it } + fadeIn(tween(500)),
+                ) {
+                    if (state is HomeUiState.Success) WeatherContent(state.weather)
+                }
             }
         }
     }
@@ -148,56 +147,4 @@ private fun TemperatureReading(value: String, icon: ImageVector, description: St
         Icon(icon, contentDescription = null)
         Text(value)
     }
-}
-
-private val PreviewWeather = WeatherUiState(
-    locality = "San Francisco, California", time = "14:30",
-    currentTemperature = "18°C", todayHigh = "22°C", todayLow = "12°C",
-)
-
-@Preview(name = "Success - Light", showBackground = true)
-@Composable
-private fun HomeScreenSuccessLightPreview() {
-    PreviewHomeScreen(HomeUiState.Success(PreviewWeather))
-}
-
-@Preview(name = "Success - Dark", showBackground = true)
-@Composable
-private fun HomeScreenSuccessDarkPreview() {
-    PreviewHomeScreen(HomeUiState.Success(PreviewWeather), darkTheme = true)
-}
-
-@Preview(name = "Loading", showBackground = true)
-@Composable
-private fun HomeScreenLoadingPreview() {
-    PreviewHomeScreen(HomeUiState.Loading)
-}
-
-@Preview(name = "Error - Permission denied", showBackground = true)
-@Composable
-private fun HomeScreenPermissionDeniedPreview() {
-    PreviewHomeScreen(HomeUiState.Error(HomeError.PermissionDenied))
-}
-
-@Preview(name = "Error - Permission denied forever", showBackground = true)
-@Composable
-private fun HomeScreenPermissionDeniedForeverPreview() {
-    PreviewHomeScreen(HomeUiState.Error(HomeError.PermissionDeniedForever))
-}
-
-@Preview(name = "Error - Location unavailable", showBackground = true)
-@Composable
-private fun HomeScreenLocationUnavailablePreview() {
-    PreviewHomeScreen(HomeUiState.Error(HomeError.LocationUnavailable))
-}
-
-@Preview(name = "Error - Weather unavailable", showBackground = true)
-@Composable
-private fun HomeScreenWeatherUnavailablePreview() {
-    PreviewHomeScreen(HomeUiState.Error(HomeError.WeatherUnavailable))
-}
-
-@Composable
-private fun PreviewHomeScreen(state: HomeUiState, darkTheme: Boolean = false) {
-    DynamisTheme(darkTheme = darkTheme) { HomeScreen(state, onRetry = {}) }
 }
