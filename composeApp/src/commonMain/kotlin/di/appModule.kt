@@ -2,6 +2,7 @@ package di
 
 import data.repo.DefaultWeatherRepository
 import data.source.api.KtorWeatherApi
+import data.source.api.configureWeatherClient
 import dev.jordond.compass.geocoder.Geocoder
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.MobileGeolocator
@@ -12,9 +13,7 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 import ui.screen.home.HomeViewModel
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
+import org.koin.dsl.onClose
 
 fun appModule() : List<Module> = listOf(providesViewModel, providesHttpClient, providesApiService, providesRepository, providesGeoLocator)
 
@@ -24,18 +23,8 @@ val providesViewModel = module {
 
 val providesHttpClient = module {
     single {
-        HttpClient {
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        prettyPrint = true
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                    }
-                )
-            }
-        }
-    }
+        HttpClient { configureWeatherClient() }
+    } onClose { client -> client?.close() }
 }
 
 val providesApiService = module {
