@@ -9,6 +9,6 @@ import org.koin.core.annotation.KoinExperimentalAPI
 @OptIn(KoinExperimentalAPI::class)
 @Composable
 fun HomeRoute(viewModel: HomeViewModel = koinViewModel()) {
-    val isShowing by viewModel.isShowing.collectAsStateWithLifecycle()
-    HomeScreen(weather = viewModel.weatherUIState.value, isShowing = isShowing)
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    HomeScreen(state = state, onRetry = viewModel::refresh)
 }

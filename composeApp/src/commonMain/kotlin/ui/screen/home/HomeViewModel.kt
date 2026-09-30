@@ -1,64 +1,58 @@
 package ui.screen.home
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.jordond.compass.geocoder.Geocoder
-import dev.jordond.compass.geocoder.placeOrNull
-import dev.jordond.compass.geolocation.Geolocator
-import dev.jordond.compass.geolocation.currentLocationOrNull
+import domain.LocationException
+import domain.LocationFailure
+import domain.LocationProvider
 import domain.WeatherRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 class HomeViewModel(
     private val repository: WeatherRepository,
-    private val geoLocator: Geolocator,
-    private val geocoder: Geocoder,
+    private val locationProvider: LocationProvider,
 ) : ViewModel() {
-    private val _isShowing = MutableStateFlow(false)
-    val isShowing: StateFlow<Boolean> = _isShowing.asStateFlow()
-    private val _weatherUiState = mutableStateOf(WeatherUiState())
-    val weatherUIState: State<WeatherUiState> = _weatherUiState
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
+    val uiState = _uiState.asStateFlow()
+    private var loadJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            geoLocator.currentLocationOrNull()?.let { location ->
-                getWeather(location.coordinates.latitude, location.coordinates.longitude)
-                geocoder.placeOrNull(location.coordinates)?.let { place ->
-                    _weatherUiState.value = _weatherUiState.value.copy(
-                        locality = listOfNotNull(place.locality, place.administrativeArea)
-                            .filter { it.isNotBlank() }.distinct().joinToString(", "),
-                    )
-                }
-            }
-        }
+        refresh()
     }
 
-    private fun getWeather(latitude: Double, longitude: Double) {
-        viewModelScope.launch {
+    fun refresh() {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading
             try {
-                    val forecast = repository.getWeather(latitude, longitude)
-                    _weatherUiState.value = _weatherUiState.value.copy(
-                        time = forecast.observedAt.time.toString(),
-                        currentTemperature = forecast.temperature.format(forecast.temperatureUnit),
-                        currentWeatherCode = forecast.weatherCode ?: 0,
-                        todayHigh = forecast.todayHigh.format(forecast.temperatureUnit),
-                        todayLow = forecast.todayLow.format(forecast.temperatureUnit),
-                    )
-                    _isShowing.value = true
+                val coordinates = locationProvider.currentLocation()
+                val weather = repository.getWeather(coordinates.latitude, coordinates.longitude).toUiState()
+                ensureActive()
+                _uiState.value = HomeUiState.Success(weather)
+                // Show the forecast immediately; the optional place name can arrive later.
+                val locality = locationProvider.locality(coordinates)
+                ensureActive()
+                _uiState.value = HomeUiState.Success(weather.copy(locality = locality.orEmpty()))
             } catch (cause: CancellationException) {
                 throw cause
+            } catch (cause: LocationException) {
+                ensureActive()
+                _uiState.value = HomeUiState.Error(
+                    when (cause.reason) {
+                        LocationFailure.PermissionDenied -> HomeError.PermissionDenied
+                        LocationFailure.PermissionDeniedForever -> HomeError.PermissionDeniedForever
+                        LocationFailure.Unavailable -> HomeError.LocationUnavailable
+                    },
+                )
             } catch (cause: Exception) {
-                // Screen-level recovery is introduced with the unified UI state.
+                ensureActive()
+                _uiState.value = HomeUiState.Error(HomeError.WeatherUnavailable)
             }
         }
     }
 }
-
-private fun Double?.format(unit: String): String = this?.let { "${it.roundToInt()}$unit" } ?: "—"

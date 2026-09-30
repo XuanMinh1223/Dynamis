@@ -1,3 +1,10 @@
 <resources>
     <string name="home_screen">Home Screen</string>
+    <string name="loading_weather">Loading weather…</string>
+    <string name="retry">Try again</string>
+    <string name="current_location">Current location</string>
+    <string name="location_permission_denied">Allow location access to see the weather near you.</string>
+    <string name="location_permission_denied_forever">Enable location access for Dynamis in your device settings, then try again.</string>
+    <string name="location_unavailable">Your location is unavailable. Check that location services are enabled and try again.</string>
+    <string name="weather_unavailable">Weather could not be loaded. Check your connection and try again.</string>
 </resources>

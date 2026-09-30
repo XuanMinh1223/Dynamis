@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -30,13 +32,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import dynamis.composeapp.generated.resources.Res
+import dynamis.composeapp.generated.resources.current_location
+import dynamis.composeapp.generated.resources.loading_weather
+import dynamis.composeapp.generated.resources.location_permission_denied
+import dynamis.composeapp.generated.resources.location_permission_denied_forever
+import dynamis.composeapp.generated.resources.location_unavailable
+import dynamis.composeapp.generated.resources.retry
+import dynamis.composeapp.generated.resources.weather_unavailable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeScreen(
-    weather: WeatherUiState,
-    isShowing: Boolean,
+    state: HomeUiState,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val weather = (state as? HomeUiState.Success)?.weather ?: WeatherUiState()
+    val isShowing = state is HomeUiState.Success
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -51,7 +64,7 @@ fun HomeScreen(
     ) {
         val transitionState = remember { MutableTransitionState(isShowing) }
         transitionState.targetState = isShowing
-        Column {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -73,6 +86,23 @@ fun HomeScreen(
                         .padding(8.dp)
                 )
             }
+            when (state) {
+                HomeUiState.Loading -> {
+                    CircularProgressIndicator(Modifier.padding(16.dp))
+                    Text(stringResource(Res.string.loading_weather))
+                }
+                is HomeUiState.Error -> {
+                    val message = when (state.reason) {
+                        HomeError.PermissionDenied -> Res.string.location_permission_denied
+                        HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
+                        HomeError.LocationUnavailable -> Res.string.location_unavailable
+                        HomeError.WeatherUnavailable -> Res.string.weather_unavailable
+                    }
+                    Text(stringResource(message), modifier = Modifier.padding(16.dp))
+                    Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+                }
+                is HomeUiState.Success -> Unit
+            }
             AnimatedVisibility(
                 visibleState = transitionState,
                 enter = slideInVertically(
@@ -84,7 +114,7 @@ fun HomeScreen(
             ) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = weather.locality,
+                        text = weather.locality.ifBlank { stringResource(Res.string.current_location) },
                         style = MaterialTheme.typography.body1
                     )
                     Text(
@@ -128,8 +158,8 @@ fun HomeScreen(
 private fun HomeScreenPreview() {
     MaterialTheme {
         HomeScreen(
-            weather = WeatherUiState(locality = "San Francisco, California", currentTemperature = "18°C"),
-            isShowing = true,
+            state = HomeUiState.Success(WeatherUiState(locality = "San Francisco, California", currentTemperature = "18°C")),
+            onRetry = {},
         )
     }
 }
