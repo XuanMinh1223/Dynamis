@@ -27,9 +27,6 @@ class CompassLocationProvider(
                     if (result.forever) LocationFailure.PermissionDeniedForever
                     else LocationFailure.PermissionDenied,
                 )
-                is GeolocatorResult.PermissionError -> throw LocationException(
-                    LocationFailure.PermissionDenied, result.cause,
-                )
                 else -> throw LocationException(LocationFailure.Unavailable)
             }
         } catch (cause: CancellationException) {

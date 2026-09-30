@@ -10,7 +10,7 @@ import dev.jordond.compass.geolocation.MobileGeolocator
 import data.source.api.WeatherApi
 import domain.WeatherRepository
 import domain.LocationProvider
-import org.koin.compose.viewmodel.dsl.viewModelOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import ui.screen.home.HomeViewModel

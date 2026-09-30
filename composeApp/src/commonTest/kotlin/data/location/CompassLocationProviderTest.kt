@@ -58,6 +58,9 @@ class CompassLocationProviderTest {
             override val trackingStatus = emptyFlow<TrackingStatus>()
             override suspend fun isAvailable() = true
             override suspend fun current(priority: Priority) = current()
+            override suspend fun current(request: LocationRequest) = current()
+            override suspend fun lastLocation(priority: Priority) = current()
+            override suspend fun lastLocation(request: LocationRequest) = current()
             override fun track(request: LocationRequest) = emptyFlow<TrackingStatus>()
             override fun stopTracking() = Unit
         },
