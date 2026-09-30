@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class KtorWeatherApiTest {
@@ -31,9 +30,9 @@ class KtorWeatherApiTest {
             assertEquals("-122.4", request.url.parameters["longitude"])
             assertEquals("auto", request.url.parameters["timezone"])
             assertEquals("celsius", request.url.parameters["temperature_unit"])
-            assertEquals("temperature_2m,weather_code", request.url.parameters["current"])
-            assertEquals("temperature_2m_max,temperature_2m_min", request.url.parameters["daily"])
-            assertNull(request.url.parameters["hourly"])
+            assertEquals(ApiConstants.ParameterValues.CURRENT_VALUES, request.url.parameters["current"])
+            assertEquals(ApiConstants.ParameterValues.HOURLY_VALUES, request.url.parameters["hourly"])
+            assertEquals(ApiConstants.ParameterValues.DAILY_VALUES, request.url.parameters["daily"])
             respond(validForecast, headers = jsonHeaders)
         }
         val client = HttpClient(engine) { configureWeatherClient() }
