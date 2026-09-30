@@ -14,7 +14,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -25,13 +25,12 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
-        
+
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
-            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -43,14 +42,14 @@ kotlin {
             implementation(libs.compose.icons.core)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
-            implementation(libs.koin.composeVM)
+            implementation(libs.koin.compose.viewmodel)
             implementation(libs.jetbrains.navigation.compose)
             implementation(libs.jetbrains.lifecycle.runtime.compose)
             implementation(libs.jetbrains.lifecycle.viewmodel)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.kotlin.serialization)
+            implementation(libs.ktor.serialization.json)
             implementation(libs.kotlinx.datetime)
 
             implementation(libs.compass.geocoder)
@@ -75,7 +74,7 @@ kotlin {
 }
 
 android {
-    namespace = "org.xuan.project"
+    namespace = "org.xuan.dynamis"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -109,5 +108,9 @@ android {
     dependencies {
         debugImplementation(libs.compose.ui.tooling)
     }
+}
+
+compose.resources {
+    packageOfResClass = "org.xuan.dynamis.resources"
 }
 

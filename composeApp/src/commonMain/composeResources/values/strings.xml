@@ -1,5 +1,4 @@
 <resources>
-    <string name="home_screen">Home Screen</string>
     <string name="loading_weather">Loading weather…</string>
     <string name="retry">Try again</string>
     <string name="refresh_weather">Refresh weather</string>
