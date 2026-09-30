@@ -21,7 +21,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.runtime.Composable
@@ -84,18 +83,10 @@ fun HomeScreen() {
                 exit = fadeOut(animationSpec = tween(durationMillis = 500))
             ) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row {
-                        Icon(
-                            Icons.Default.LocationOn,
-                            contentDescription = "Location",
-                            modifier = Modifier
-                                .padding(8.dp)
-                        )
-                        Text(
-                            text = viewModel.weatherUIState.value.locality,
-                            style = MaterialTheme.typography.body1
-                        )
-                    }
+                    Text(
+                        text = viewModel.weatherUIState.value.locality,
+                        style = MaterialTheme.typography.body1
+                    )
                     Text(
                         text = viewModel.weatherUIState.value.time,
                         style = MaterialTheme.typography.caption

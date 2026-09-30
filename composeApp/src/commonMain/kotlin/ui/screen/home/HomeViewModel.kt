@@ -4,12 +4,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.jordond.compass.Location
 import dev.jordond.compass.geocoder.Geocoder
 import dev.jordond.compass.geocoder.placeOrNull
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.currentLocationOrNull
-import dev.jordond.compass.geolocation.mobile.MobileLocator
 import domain.Repository
 import domain.model.ForecastResponse
 import domain.model.WeatherUIState
@@ -50,7 +48,7 @@ class HomeViewModel(
                 )
                 geocoder.placeOrNull(coordinates = location.coordinates)?.let { place ->
                     _weatherUiState.value = _weatherUiState.value.copy(
-                        locality = place.locality ?: ""
+                        locality = (place.locality + ", " + place.administrativeArea) ?: ""
                     )
                 }
             }
