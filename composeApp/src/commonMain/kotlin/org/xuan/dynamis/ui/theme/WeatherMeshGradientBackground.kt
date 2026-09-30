@@ -30,25 +30,26 @@ fun WeatherMeshGradientBackground(
         Canvas(Modifier.fillMaxSize()) {
             drawRect(palette.background)
 
-            val radius = size.maxDimension * 0.86f
+            // Keep brighter horizon light below the shaded upper sky.
+            val radius = size.maxDimension * 0.72f
             drawRadialBloom(
                 color = palette.glow,
-                center = Offset(size.width * 0.16f, size.height * 0.12f),
+                center = Offset(size.width * 0.18f, size.height * 0.7f),
                 radius = radius,
             )
             drawRadialBloom(
                 color = palette.weatherPrimary,
-                center = Offset(size.width * 0.9f, size.height * 0.28f),
+                center = Offset(size.width * 0.86f, size.height * 0.25f),
                 radius = radius,
             )
             drawRadialBloom(
                 color = palette.weatherSecondary,
-                center = Offset(size.width * 0.14f, size.height * 0.78f),
+                center = Offset(size.width * 0.82f, size.height * 0.95f),
                 radius = radius,
             )
             drawRadialBloom(
                 color = palette.shadow,
-                center = Offset(size.width * 0.88f, size.height * 0.94f),
+                center = Offset(size.width * 0.08f, size.height * 0.04f),
                 radius = radius,
             )
         }
@@ -93,8 +94,8 @@ private fun DrawScope.drawRadialBloom(
     drawRect(
         brush = Brush.radialGradient(
             colorStops = arrayOf(
-                0f to color.copy(alpha = 0.78f),
-                0.48f to color.copy(alpha = 0.34f),
+                0f to color.copy(alpha = 0.88f),
+                0.48f to color.copy(alpha = 0.4f),
                 1f to Color.Transparent,
             ),
             center = center,

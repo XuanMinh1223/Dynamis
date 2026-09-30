@@ -51,9 +51,23 @@ private fun HomeScreenSuccessLightPreview() {
 @Composable
 private fun HomeScreenSuccessDarkPreview() {
     PreviewHomeScreen(
-        HomeUiState.Success(PreviewWeather.copy(currentWeatherCode = 95, timeOfDay = TimeOfDay.Night)),
+        HomeUiState.Success(
+            PreviewWeather.copy(time = "22:30", currentWeatherCode = 95, timeOfDay = TimeOfDay.Night),
+        ),
         darkTheme = true,
     )
+}
+
+@Preview(name = "Success - Dawn", showBackground = true)
+@Composable
+private fun HomeScreenDawnPreview() {
+    PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(time = "06:30", timeOfDay = TimeOfDay.Dawn)))
+}
+
+@Preview(name = "Success - Dusk", showBackground = true)
+@Composable
+private fun HomeScreenDuskPreview() {
+    PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(time = "18:30", timeOfDay = TimeOfDay.Dusk)))
 }
 
 @Preview(name = "Loading", showBackground = true)
@@ -188,7 +202,7 @@ private fun PreviewWeatherPaletteGallery(timeOfDay: TimeOfDay) {
                             ) {
                                 Text(
                                     text = pattern.displayName(),
-                                    modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
+                                    modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                                 )
                             }
                         }

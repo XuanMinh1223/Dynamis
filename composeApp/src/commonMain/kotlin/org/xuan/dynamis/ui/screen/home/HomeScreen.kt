@@ -27,6 +27,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,13 +81,23 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(Icons.Rounded.LocationOn, contentDescription = null, modifier = Modifier.size(32.dp))
-                    IconButton(onClick = onRetry, enabled = state is HomeUiState.Success) {
+                    IconButton(
+                        onClick = onRetry,
+                        enabled = state is HomeUiState.Success,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = LocalContentColor.current,
+                            disabledContentColor = LocalContentColor.current.copy(alpha = 0.38f),
+                        ),
+                    ) {
                         Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh_weather))
                     }
                 }
                 when (state) {
                     HomeUiState.Loading -> {
-                        CircularProgressIndicator(Modifier.padding(16.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(16.dp),
+                            color = LocalContentColor.current,
+                        )
                         Text(stringResource(Res.string.loading_weather))
                     }
                     is HomeUiState.Error -> {
