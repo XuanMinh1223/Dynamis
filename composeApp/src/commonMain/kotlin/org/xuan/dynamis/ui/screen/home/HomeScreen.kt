@@ -67,10 +67,13 @@ fun HomeScreen(
         timeOfDay = weather?.timeOfDay ?: TimeOfDay.Day,
         modifier = modifier,
     ) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        // Keep content clear of camera cutouts and system bars while the background fills the screen.
+        Box(
+            modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),
+            contentAlignment = Alignment.TopCenter,
+        ) {
             Column(
-                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
-                    .widthIn(max = 600.dp).fillMaxWidth()
+                modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth()
                     .verticalScroll(rememberScrollState()).padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
