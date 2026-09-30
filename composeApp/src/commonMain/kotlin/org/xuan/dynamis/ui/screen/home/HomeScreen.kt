@@ -155,20 +155,49 @@ private val PreviewWeather = WeatherUiState(
     currentTemperature = "18°C", todayHigh = "22°C", todayLow = "12°C",
 )
 
-@Preview
+@Preview(name = "Success - Light", showBackground = true)
 @Composable
-private fun HomeScreenPreview() {
-    DynamisTheme { HomeScreen(HomeUiState.Success(PreviewWeather), onRetry = {}) }
+private fun HomeScreenSuccessLightPreview() {
+    PreviewHomeScreen(HomeUiState.Success(PreviewWeather))
 }
 
-@Preview
+@Preview(name = "Success - Dark", showBackground = true)
 @Composable
-private fun HomeScreenDarkPreview() {
-    DynamisTheme(darkTheme = true) { HomeScreen(HomeUiState.Success(PreviewWeather), onRetry = {}) }
+private fun HomeScreenSuccessDarkPreview() {
+    PreviewHomeScreen(HomeUiState.Success(PreviewWeather), darkTheme = true)
 }
 
-@Preview
+@Preview(name = "Loading", showBackground = true)
 @Composable
-private fun HomeScreenErrorPreview() {
-    DynamisTheme { HomeScreen(HomeUiState.Error(HomeError.PermissionDenied), onRetry = {}) }
+private fun HomeScreenLoadingPreview() {
+    PreviewHomeScreen(HomeUiState.Loading)
+}
+
+@Preview(name = "Error - Permission denied", showBackground = true)
+@Composable
+private fun HomeScreenPermissionDeniedPreview() {
+    PreviewHomeScreen(HomeUiState.Error(HomeError.PermissionDenied))
+}
+
+@Preview(name = "Error - Permission denied forever", showBackground = true)
+@Composable
+private fun HomeScreenPermissionDeniedForeverPreview() {
+    PreviewHomeScreen(HomeUiState.Error(HomeError.PermissionDeniedForever))
+}
+
+@Preview(name = "Error - Location unavailable", showBackground = true)
+@Composable
+private fun HomeScreenLocationUnavailablePreview() {
+    PreviewHomeScreen(HomeUiState.Error(HomeError.LocationUnavailable))
+}
+
+@Preview(name = "Error - Weather unavailable", showBackground = true)
+@Composable
+private fun HomeScreenWeatherUnavailablePreview() {
+    PreviewHomeScreen(HomeUiState.Error(HomeError.WeatherUnavailable))
+}
+
+@Composable
+private fun PreviewHomeScreen(state: HomeUiState, darkTheme: Boolean = false) {
+    DynamisTheme(darkTheme = darkTheme) { HomeScreen(state, onRetry = {}) }
 }
