@@ -24,31 +24,32 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
-import org.koin.compose.koinInject
+import domain.model.WeatherUIState
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun HomeScreen() {
-    val viewModel = koinInject<HomeViewModel>()
+fun HomeScreen(
+    weather: WeatherUIState,
+    isShowing: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        viewModel.weatherUIState.value.backgroundGradient.first,
-                        viewModel.weatherUIState.value.backgroundGradient.second
+                        weather.backgroundGradient.first,
+                        weather.backgroundGradient.second
                     )
                 )
             )
     ) {
-        val isShowing by viewModel.isShowing.collectAsState()
         val transitionState = remember { MutableTransitionState(isShowing) }
         transitionState.targetState = isShowing
         Column {
@@ -84,16 +85,16 @@ fun HomeScreen() {
             ) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = viewModel.weatherUIState.value.locality,
+                        text = weather.locality,
                         style = MaterialTheme.typography.body1
                     )
                     Text(
-                        text = viewModel.weatherUIState.value.time,
+                        text = weather.time,
                         style = MaterialTheme.typography.caption
 
                     )
                     Text(
-                        text = viewModel.weatherUIState.value.currentTemperature,
+                        text = weather.currentTemperature,
                         style = MaterialTheme.typography.h1
                     )
                     Row(modifier = Modifier.fillMaxWidth(),
@@ -105,7 +106,7 @@ fun HomeScreen() {
                                 Icons.Default.KeyboardArrowUp,
                                 "high temperature"
                             )
-                            Text(viewModel.weatherUIState.value.todayHigh)
+                            Text(weather.todayHigh)
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -114,11 +115,22 @@ fun HomeScreen() {
                                 Icons.Default.KeyboardArrowDown,
                                 "low temperature"
                             )
-                            Text(viewModel.weatherUIState.value.todayLow)
+                            Text(weather.todayLow)
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun HomeScreenPreview() {
+    MaterialTheme {
+        HomeScreen(
+            weather = WeatherUIState(locality = "San Francisco, California", currentTemperature = "18°C"),
+            isShowing = true,
+        )
     }
 }

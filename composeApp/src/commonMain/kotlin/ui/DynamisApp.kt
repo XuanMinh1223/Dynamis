@@ -1,8 +1,6 @@
 package ui
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -12,7 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import dynamis.composeapp.generated.resources.Res
 import dynamis.composeapp.generated.resources.home_screen
 import org.jetbrains.compose.resources.StringResource
-import ui.screen.home.HomeScreen
+import ui.screen.home.HomeRoute
 
 @Composable
 fun DynamisApp(
@@ -25,7 +23,7 @@ fun DynamisApp(
             .fillMaxSize()
     ) {
         composable(route = DynamisScreen.Home.name) {
-            HomeScreen()
+            HomeRoute()
         }
     }
 }

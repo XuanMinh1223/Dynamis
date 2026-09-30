@@ -47,6 +47,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.composeVM)
             implementation(libs.jetbrains.navigation.compose)
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.content.negotiation)
