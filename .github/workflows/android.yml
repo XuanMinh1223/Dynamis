@@ -28,7 +28,7 @@ jobs:
       - name: Build, test, and lint
         run: |
           chmod +x gradlew
-          ./gradlew :composeApp:assembleDebug :composeApp:testDebugUnitTest :composeApp:lintDebug --stacktrace
+          ./gradlew :composeApp:assembleDebug :composeApp:testDebugUnitTest :composeApp:lintDebug :composeApp:compileCommonMainKotlinMetadata --stacktrace
       - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v4
