@@ -1,12 +1,12 @@
 package di
 
-import data.repo.RepositoryImplementation
+import data.repo.DefaultWeatherRepository
 import data.source.api.ApiServiceImpl
 import dev.jordond.compass.geocoder.Geocoder
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.MobileGeolocator
-import domain.ApiService
-import domain.Repository
+import data.source.api.WeatherApi
+import domain.WeatherRepository
 import org.koin.compose.viewmodel.dsl.viewModelOf
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -39,11 +39,11 @@ val providesHttpClient = module {
 }
 
 val providesApiService = module {
-    single<ApiService> { ApiServiceImpl(get()) }
+    single<WeatherApi> { ApiServiceImpl(get()) }
 }
 
 val providesRepository = module {
-    single<Repository> { RepositoryImplementation(get()) }
+    single<WeatherRepository> { DefaultWeatherRepository(get()) }
 }
 
 val providesGeoLocator = module {

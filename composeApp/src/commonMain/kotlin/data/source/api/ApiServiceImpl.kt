@@ -16,33 +16,14 @@ import data.source.api.ApiConstants.ParameterValues.DEFAULT_TEMPERATURE_UNIT
 import data.source.api.ApiConstants.ParameterValues.DEFAULT_TIMEZONE
 import data.source.api.ApiConstants.ParameterValues.DEFAULT_WIND_SPEED_UNIT
 import data.source.api.ApiConstants.ParameterValues.HOURLY_VALUES
-import domain.ApiService
-import domain.model.DataModel
-import domain.model.ForecastResponse
+import data.source.api.dto.ForecastResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class ApiServiceImpl(private val httpClient: HttpClient) : ApiService {
-    override fun getThing(): Flow<Result<DataModel>> =
-        flow {
-            try {
-                val response = httpClient
-                    .get("https://jsonplaceholder.typicode.com/todos/1")
-                    .body<DataModel>()
-                emit(Result.success(response))
-            } catch (exception: Exception) {
-                exception.printStackTrace()
-                emit(
-                    Result.failure(
-                        Error(exception.message, exception)
-                    )
-                )
-            }
-        }
-
+class ApiServiceImpl(private val httpClient: HttpClient) : WeatherApi {
     override fun getWeather(
         latitude: Double,
         longitude: Double

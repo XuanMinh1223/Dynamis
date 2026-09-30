@@ -1,9 +1,8 @@
-package domain.model
+package ui.screen.home
 
 import androidx.compose.ui.graphics.Color
-import ui.screen.home.ClearDay
 
-data class WeatherUIState(
+data class WeatherUiState(
     val locality: String = "",
     val time: String = "00:00",
     val currentTemperature: String = "0",

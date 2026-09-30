@@ -1,9 +1,8 @@
-package domain
+package data.source.api
 
-import domain.model.DataModel
-import domain.model.ForecastResponse
+import data.source.api.dto.ForecastResponse
 import kotlinx.coroutines.flow.Flow
 
-interface Repository {
+interface WeatherApi {
     fun getWeather(latitude: Double, longitude: Double): Flow<Result<ForecastResponse>>
 }

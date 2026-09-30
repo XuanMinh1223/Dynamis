@@ -29,12 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
-import domain.model.WeatherUIState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
-    weather: WeatherUIState,
+    weather: WeatherUiState,
     isShowing: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -129,7 +128,7 @@ fun HomeScreen(
 private fun HomeScreenPreview() {
     MaterialTheme {
         HomeScreen(
-            weather = WeatherUIState(locality = "San Francisco, California", currentTemperature = "18°C"),
+            weather = WeatherUiState(locality = "San Francisco, California", currentTemperature = "18°C"),
             isShowing = true,
         )
     }
