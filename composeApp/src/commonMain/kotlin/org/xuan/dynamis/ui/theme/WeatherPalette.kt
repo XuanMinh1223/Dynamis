@@ -25,6 +25,9 @@ enum class WeatherPattern(
     Thunderstorm(skyPalette(0xFF363954, 0xFF7A7697, 0xFF535573, 0xFF1D243B), sunlight = 0.05f),
     Unknown(skyPalette(0xFF546F88, 0xFF9AB6C7, 0xFF7D96A9, 0xFF354D66), sunlight = 0.45f);
 
+    val displayName: String
+        get() = name.replace(Regex("([a-z])([A-Z])"), "\$1 \$2")
+
     companion object {
         fun fromWeatherCode(code: Int?): WeatherPattern = when (code) {
             0 -> ClearSky

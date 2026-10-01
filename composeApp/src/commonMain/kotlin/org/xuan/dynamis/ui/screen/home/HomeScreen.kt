@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.xuan.dynamis.resources.Res
 import org.xuan.dynamis.resources.current_location
 import org.xuan.dynamis.resources.high_temperature
@@ -50,7 +51,6 @@ import org.xuan.dynamis.resources.low_temperature
 import org.xuan.dynamis.resources.refresh_weather
 import org.xuan.dynamis.resources.retry
 import org.xuan.dynamis.resources.weather_unavailable
-import org.jetbrains.compose.resources.stringResource
 import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherMeshGradientBackground
 import org.xuan.dynamis.ui.theme.WeatherPaperSymbol
@@ -74,8 +74,12 @@ fun HomeScreen(
             contentAlignment = Alignment.TopCenter,
         ) {
             Column(
-                modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth()
-                    .verticalScroll(rememberScrollState()).padding(16.dp),
+                modifier =
+                    Modifier
+                        .widthIn(max = 600.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -88,10 +92,11 @@ fun HomeScreen(
                     IconButton(
                         onClick = onRetry,
                         enabled = state is HomeUiState.Success,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = LocalContentColor.current,
-                            disabledContentColor = LocalContentColor.current.copy(alpha = 0.38f),
-                        ),
+                        colors =
+                            IconButtonDefaults.iconButtonColors(
+                                contentColor = LocalContentColor.current,
+                                disabledContentColor = LocalContentColor.current.copy(alpha = 0.38f),
+                            ),
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh_weather))
                     }
@@ -104,17 +109,22 @@ fun HomeScreen(
                         )
                         Text(stringResource(Res.string.loading_weather))
                     }
+
                     is HomeUiState.Error -> {
-                        val message = when (state.reason) {
-                            HomeError.PermissionDenied -> Res.string.location_permission_denied
-                            HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
-                            HomeError.LocationUnavailable -> Res.string.location_unavailable
-                            HomeError.WeatherUnavailable -> Res.string.weather_unavailable
-                        }
+                        val message =
+                            when (state.reason) {
+                                HomeError.PermissionDenied -> Res.string.location_permission_denied
+                                HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
+                                HomeError.LocationUnavailable -> Res.string.location_unavailable
+                                HomeError.WeatherUnavailable -> Res.string.weather_unavailable
+                            }
                         Text(stringResource(message), textAlign = TextAlign.Center)
                         Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
                     }
-                    is HomeUiState.Success -> Unit
+
+                    is HomeUiState.Success -> {
+                        Unit
+                    }
                 }
                 AnimatedVisibility(
                     visible = state is HomeUiState.Success,
@@ -142,14 +152,23 @@ private fun WeatherContent(weather: WeatherUiState) {
         Text(weather.time, style = MaterialTheme.typography.labelMedium)
         WeatherPaperSymbol(weather.currentWeatherCode, weather.timeOfDay, weather.moonPhase)
         Text(weather.currentTemperature, style = MaterialTheme.typography.displayLarge)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             TemperatureReading(
-                weather.todayHigh, Icons.Default.KeyboardArrowUp,
+                weather.todayHigh,
+                Icons.Default.KeyboardArrowUp,
                 stringResource(Res.string.high_temperature, weather.todayHigh),
             )
-            Text(text = weather.currentWeatherCode.toString())
+            Text(
+                text = weather.weatherPattern.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+            )
             TemperatureReading(
-                weather.todayLow, Icons.Default.KeyboardArrowDown,
+                weather.todayLow,
+                Icons.Default.KeyboardArrowDown,
                 stringResource(Res.string.low_temperature, weather.todayLow),
             )
         }
@@ -157,7 +176,11 @@ private fun WeatherContent(weather: WeatherUiState) {
 }
 
 @Composable
-private fun TemperatureReading(value: String, icon: ImageVector, description: String) {
+private fun TemperatureReading(
+    value: String,
+    icon: ImageVector,
+    description: String,
+) {
     Row(
         modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = description },
         verticalAlignment = Alignment.CenterVertically,

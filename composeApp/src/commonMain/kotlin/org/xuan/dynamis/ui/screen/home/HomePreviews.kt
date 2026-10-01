@@ -31,15 +31,16 @@ import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherMeshGradientBackground
 import org.xuan.dynamis.ui.theme.WeatherPattern
 
-private val PreviewWeather = WeatherUiState(
-    locality = "San Francisco, California",
-    time = "14:30",
-    currentTemperature = "18°C",
-    currentWeatherCode = 0,
-    timeOfDay = TimeOfDay.Day,
-    todayHigh = "22°C",
-    todayLow = "12°C",
-)
+private val PreviewWeather =
+    WeatherUiState(
+        locality = "San Francisco, California",
+        time = "14:30",
+        currentTemperature = "18°C",
+        currentWeatherCode = 0,
+        timeOfDay = TimeOfDay.Day,
+        todayHigh = "22°C",
+        todayLow = "12°C",
+    )
 
 @Preview(name = "Success - Light", showBackground = true)
 @Composable
@@ -52,8 +53,12 @@ private fun HomeScreenSuccessLightPreview() {
 private fun HomeScreenSuccessDarkPreview() {
     PreviewHomeScreen(
         HomeUiState.Success(
-            PreviewWeather.copy(time = "22:30", currentWeatherCode = 0, timeOfDay = TimeOfDay.Night,
-                moonPhase = 0.25f),
+            PreviewWeather.copy(
+                time = "22:30",
+                currentWeatherCode = 0,
+                timeOfDay = TimeOfDay.Night,
+                moonPhase = 0.25f,
+            ),
         ),
         darkTheme = true,
     )
@@ -172,7 +177,7 @@ private fun WeatherPaletteTransitionPreview() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(pattern.displayName(), style = MaterialTheme.typography.titleLarge)
+                    Text(pattern.displayName, style = MaterialTheme.typography.titleLarge)
                     Text(timeOfDay.name, style = MaterialTheme.typography.labelLarge)
                     Text("18°C", style = MaterialTheme.typography.displayLarge)
                 }
@@ -212,15 +217,18 @@ private fun PreviewWeatherPaletteGallery(timeOfDay: TimeOfDay) {
                 ) {
                     rowPatterns.forEach { pattern ->
                         Box(
-                            modifier = Modifier.weight(1f).height(112.dp)
-                                .clip(RoundedCornerShape(16.dp)),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .height(112.dp)
+                                    .clip(RoundedCornerShape(16.dp)),
                         ) {
                             WeatherMeshGradientBackground(
                                 pattern = pattern,
                                 timeOfDay = timeOfDay,
                             ) {
                                 Text(
-                                    text = pattern.displayName(),
+                                    text = pattern.displayName,
                                     modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                                 )
                             }
@@ -233,10 +241,10 @@ private fun PreviewWeatherPaletteGallery(timeOfDay: TimeOfDay) {
     }
 }
 
-private fun WeatherPattern.displayName(): String = name
-    .replace(Regex("([a-z])([A-Z])"), "\$1 \$2")
-
 @Composable
-private fun PreviewHomeScreen(state: HomeUiState, darkTheme: Boolean = false) {
+private fun PreviewHomeScreen(
+    state: HomeUiState,
+    darkTheme: Boolean = false,
+) {
     DynamisTheme(darkTheme = darkTheme) { HomeScreen(state, onRetry = {}) }
 }
