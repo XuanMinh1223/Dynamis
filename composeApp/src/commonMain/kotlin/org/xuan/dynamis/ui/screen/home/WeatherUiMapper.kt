@@ -13,6 +13,14 @@ fun WeatherForecast.toUiState(locality: String? = null): WeatherUiState = Weathe
     moonPhase = moonPhaseFraction(observedAt, timeZone),
     todayHigh = todayHigh.format(temperatureUnit),
     todayLow = todayLow.format(temperatureUnit),
+    hourly = hourly.map { forecast ->
+        HourlyWeatherUiState(
+            time = "${forecast.time.hour.toString().padStart(2, '0')}:00",
+            hour = forecast.time.hour,
+            temperature = forecast.temperature.format(temperatureUnit),
+            weatherCode = forecast.weatherCode,
+        )
+    },
 )
 
 private fun Double?.format(unit: String): String = this?.let { "${it.roundToInt()}$unit" } ?: "—"

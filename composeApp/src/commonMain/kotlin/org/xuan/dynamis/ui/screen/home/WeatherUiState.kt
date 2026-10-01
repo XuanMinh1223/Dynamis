@@ -12,7 +12,18 @@ data class WeatherUiState(
     val moonPhase: Float = 0.5f,
     val todayHigh: String = "—",
     val todayLow: String = "—",
+    val hourly: List<HourlyWeatherUiState> = emptyList(),
 ) {
     val weatherPattern: WeatherPattern
         get() = WeatherPattern.fromWeatherCode(currentWeatherCode)
+}
+
+data class HourlyWeatherUiState(
+    val time: String,
+    val hour: Int,
+    val temperature: String,
+    val weatherCode: Int?,
+) {
+    val timeOfDay: TimeOfDay
+        get() = TimeOfDay.fromHour(hour)
 }

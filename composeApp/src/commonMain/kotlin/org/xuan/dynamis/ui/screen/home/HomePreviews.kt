@@ -40,6 +40,20 @@ private val PreviewWeather =
         timeOfDay = TimeOfDay.Day,
         todayHigh = "22°C",
         todayLow = "12°C",
+        hourly = List(24) { index ->
+            val hour = (15 + index) % 24
+            HourlyWeatherUiState(
+                time = "${hour.toString().padStart(2, '0')}:00",
+                hour = hour,
+                temperature = "${16 + index % 7}°C",
+                weatherCode = when (index % 6) {
+                    3 -> 2
+                    4 -> 61
+                    5 -> 3
+                    else -> 0
+                },
+            )
+        },
     )
 
 @Preview(name = "Success - Light", showBackground = true)

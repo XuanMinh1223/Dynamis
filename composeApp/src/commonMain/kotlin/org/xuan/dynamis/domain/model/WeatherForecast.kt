@@ -10,4 +10,11 @@ data class WeatherForecast(
     val weatherCode: Int?,
     val todayHigh: Double?,
     val todayLow: Double?,
+    val hourly: List<HourlyForecast> = emptyList(),
+)
+
+data class HourlyForecast(
+    val time: LocalDateTime,
+    val temperature: Double,
+    val weatherCode: Int?,
 )

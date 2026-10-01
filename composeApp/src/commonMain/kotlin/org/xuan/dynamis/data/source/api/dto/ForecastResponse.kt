@@ -8,6 +8,7 @@ data class ForecastResponse(
     val timezone: String? = null,
     @SerialName("current_units") val currentUnits: CurrentUnits? = null,
     val current: Current? = null,
+    val hourly: Hourly? = null,
     val daily: Daily? = null,
 )
 
@@ -21,6 +22,13 @@ data class Current(
     val time: String? = null,
     @SerialName("temperature_2m") val temperature: Double? = null,
     @SerialName("weather_code") val weatherCode: Int? = null,
+)
+
+@Serializable
+data class Hourly(
+    val time: List<String> = emptyList(),
+    @SerialName("temperature_2m") val temperature: List<Double?> = emptyList(),
+    @SerialName("weather_code") val weatherCode: List<Int?> = emptyList(),
 )
 
 @Serializable

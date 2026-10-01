@@ -1,5 +1,6 @@
 package org.xuan.dynamis.ui.theme
 
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 
@@ -73,6 +74,10 @@ data class WeatherColorPalette(
     val weatherSecondary: Color,
     val foreground: Color,
 )
+
+val LocalWeatherColorPalette = staticCompositionLocalOf {
+    weatherColorPalette(WeatherPattern.Unknown, TimeOfDay.Day)
+}
 
 /** Weather defines the sky; local time tints its atmosphere and horizon. */
 fun weatherColorPalette(pattern: WeatherPattern, timeOfDay: TimeOfDay): WeatherColorPalette {

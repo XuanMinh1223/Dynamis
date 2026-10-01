@@ -1,6 +1,7 @@
 package org.xuan.dynamis.data.repo
 
 import org.xuan.dynamis.data.source.api.dto.ForecastResponse
+import org.xuan.dynamis.domain.model.HourlyForecast
 import org.xuan.dynamis.domain.model.WeatherForecast
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -28,6 +29,25 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
     val unit = currentUnits?.temperature?.takeIf { it.isNotBlank() }
         ?: throw InvalidForecastException("Temperature unit is missing")
     val dateIndex = daily?.time.orEmpty().indexOf(observedAt.date.toString())
+    val hourlyForecast = hourly?.let { hourlyData ->
+        hourlyData.time.mapIndexedNotNull { index, timestamp ->
+            val forecastTime = try {
+                LocalDateTime.parse(timestamp)
+            } catch (cause: IllegalArgumentException) {
+                null
+            }
+            val forecastTemperature = hourlyData.temperature.getOrNull(index)?.takeIf { it.isFinite() }
+            if (forecastTime == null || forecastTime < observedAt || forecastTemperature == null) {
+                null
+            } else {
+                HourlyForecast(
+                    time = forecastTime,
+                    temperature = forecastTemperature,
+                    weatherCode = hourlyData.weatherCode.getOrNull(index),
+                )
+            }
+        }
+    }.orEmpty().take(24)
 
     return WeatherForecast(
         observedAt = observedAt,
@@ -37,5 +57,6 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
         weatherCode = current.weatherCode,
         todayHigh = daily?.high?.getOrNull(dateIndex)?.takeIf { it.isFinite() },
         todayLow = daily?.low?.getOrNull(dateIndex)?.takeIf { it.isFinite() },
+        hourly = hourlyForecast,
     )
 }

@@ -53,7 +53,10 @@ fun WeatherMeshGradientBackground(
                 radius = radius,
             )
         }
-        CompositionLocalProvider(LocalContentColor provides palette.foreground) {
+        CompositionLocalProvider(
+            LocalWeatherColorPalette provides palette,
+            LocalContentColor provides palette.foreground,
+        ) {
             content()
         }
     }
