@@ -9,6 +9,7 @@ data class WeatherUiState(
     val currentTemperature: String = "—",
     val currentWeatherCode: Int? = null,
     val timeOfDay: TimeOfDay = TimeOfDay.Day,
+    val moonPhase: Float = 0.5f,
     val todayHigh: String = "—",
     val todayLow: String = "—",
 ) {

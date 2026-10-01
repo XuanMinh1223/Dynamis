@@ -53,6 +53,7 @@ import org.xuan.dynamis.resources.weather_unavailable
 import org.jetbrains.compose.resources.stringResource
 import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherMeshGradientBackground
+import org.xuan.dynamis.ui.theme.WeatherPaperSymbol
 import org.xuan.dynamis.ui.theme.WeatherPattern
 
 @Composable
@@ -139,12 +140,14 @@ private fun WeatherContent(weather: WeatherUiState) {
             textAlign = TextAlign.Center,
         )
         Text(weather.time, style = MaterialTheme.typography.labelMedium)
+        WeatherPaperSymbol(weather.currentWeatherCode, weather.timeOfDay, weather.moonPhase)
         Text(weather.currentTemperature, style = MaterialTheme.typography.displayLarge)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             TemperatureReading(
                 weather.todayHigh, Icons.Default.KeyboardArrowUp,
                 stringResource(Res.string.high_temperature, weather.todayHigh),
             )
+            Text(text = weather.currentWeatherCode.toString())
             TemperatureReading(
                 weather.todayLow, Icons.Default.KeyboardArrowDown,
                 stringResource(Res.string.low_temperature, weather.todayLow),

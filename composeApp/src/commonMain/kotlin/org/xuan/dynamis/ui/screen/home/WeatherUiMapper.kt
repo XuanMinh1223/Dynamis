@@ -10,6 +10,7 @@ fun WeatherForecast.toUiState(locality: String? = null): WeatherUiState = Weathe
     currentTemperature = temperature.format(temperatureUnit),
     currentWeatherCode = weatherCode,
     timeOfDay = TimeOfDay.fromHour(observedAt.hour),
+    moonPhase = moonPhaseFraction(observedAt, timeZone),
     todayHigh = todayHigh.format(temperatureUnit),
     todayLow = todayLow.format(temperatureUnit),
 )

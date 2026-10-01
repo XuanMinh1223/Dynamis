@@ -52,7 +52,8 @@ private fun HomeScreenSuccessLightPreview() {
 private fun HomeScreenSuccessDarkPreview() {
     PreviewHomeScreen(
         HomeUiState.Success(
-            PreviewWeather.copy(time = "22:30", currentWeatherCode = 95, timeOfDay = TimeOfDay.Night),
+            PreviewWeather.copy(time = "22:30", currentWeatherCode = 0, timeOfDay = TimeOfDay.Night,
+                moonPhase = 0.25f),
         ),
         darkTheme = true,
     )
@@ -68,6 +69,24 @@ private fun HomeScreenDawnPreview() {
 @Composable
 private fun HomeScreenDuskPreview() {
     PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(time = "18:30", timeOfDay = TimeOfDay.Dusk)))
+}
+
+@Preview(name = "Success - Rain", showBackground = true)
+@Composable
+private fun HomeScreenRainPreview() {
+    PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(currentWeatherCode = 63)))
+}
+
+@Preview(name = "Success - Snow", showBackground = true)
+@Composable
+private fun HomeScreenSnowPreview() {
+    PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(currentWeatherCode = 73)))
+}
+
+@Preview(name = "Success - Thunderstorm", showBackground = true)
+@Composable
+private fun HomeScreenThunderstormPreview() {
+    PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(currentWeatherCode = 95)))
 }
 
 @Preview(name = "Loading", showBackground = true)
