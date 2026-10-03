@@ -5,7 +5,8 @@ object ApiConstants {
     const val RADAR_MAPS_URL = "https://api.rainviewer.com/public/weather-maps.json"
     const val BASE_MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/positron"
     object RadarTiles {
-        const val SIZE = 256
+        // The largest size RainViewer serves; MapLibre treats 512 px tiles as one zoom level sharper.
+        const val SIZE = 512
         const val MAX_ZOOM = 7
         // Color scheme 2 is "Universal Blue".
         const val COLOR_SCHEME = 2

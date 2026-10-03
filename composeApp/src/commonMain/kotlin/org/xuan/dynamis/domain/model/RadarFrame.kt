@@ -10,7 +10,8 @@ data class RadarFrame(
 
 /** Rendering choices RainViewer applies to its tiles. */
 data class RadarTileOptions(
+    /** Has RainViewer blur the radar data, which softens the edges of its cells. */
     val smooth: Boolean = true,
-    /** Colours snow differently from rain. */
+    /** Colors snow differently from rain. */
     val snow: Boolean = true,
 )

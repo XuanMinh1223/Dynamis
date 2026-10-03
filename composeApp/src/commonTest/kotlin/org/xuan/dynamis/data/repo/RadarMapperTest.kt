@@ -21,18 +21,18 @@ class RadarMapperTest {
     @Test
     fun buildsTileTemplateFromHostAndPath() {
         val frame = response.toRadarFrames().first()
-        assertEquals("https://tilecache.rainviewer.com/v2/radar/b/256/{z}/{x}/{y}/2/1_1.png", radarTileUrl(frame))
+        assertEquals("https://tilecache.rainviewer.com/v2/radar/b/512/{z}/{x}/{y}/2/1_1.png", radarTileUrl(frame))
     }
 
     @Test
     fun tileOptionsControlSmoothAndSnowFlags() {
         val frame = response.toRadarFrames().first()
         assertEquals(
-            "https://tilecache.rainviewer.com/v2/radar/b/256/{z}/{x}/{y}/2/0_1.png",
+            "https://tilecache.rainviewer.com/v2/radar/b/512/{z}/{x}/{y}/2/0_1.png",
             radarTileUrl(frame, RadarTileOptions(smooth = false)),
         )
         assertEquals(
-            "https://tilecache.rainviewer.com/v2/radar/b/256/{z}/{x}/{y}/2/1_0.png",
+            "https://tilecache.rainviewer.com/v2/radar/b/512/{z}/{x}/{y}/2/1_0.png",
             radarTileUrl(frame, RadarTileOptions(snow = false)),
         )
     }
@@ -40,7 +40,7 @@ class RadarMapperTest {
     @Test
     fun buildsCoverageTileUrl() {
         assertEquals(
-            "https://tilecache.rainviewer.com/v2/coverage/0/256/{z}/{x}/{y}/0/0_0.png",
+            "https://tilecache.rainviewer.com/v2/coverage/0/512/{z}/{x}/{y}/0/0_0.png",
             radarCoverageTileUrl(response.host),
         )
     }
