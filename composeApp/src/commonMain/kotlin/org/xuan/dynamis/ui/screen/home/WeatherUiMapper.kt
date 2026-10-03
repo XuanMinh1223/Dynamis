@@ -21,6 +21,16 @@ fun WeatherForecast.toUiState(locality: String? = null): WeatherUiState = Weathe
             weatherCode = forecast.weatherCode,
         )
     },
+    dailyForecasts = dailyForecasts.map { forecast ->
+        DailyWeatherUiState(
+            date = forecast.date,
+            isToday = forecast.date == observedAt.date,
+            highTemperature = forecast.high.format(temperatureUnit),
+            lowTemperature = forecast.low.format(temperatureUnit),
+            weatherCode = forecast.weatherCode,
+            precipitationProbability = forecast.precipitationProbability,
+        )
+    },
 )
 
 private fun Double?.format(unit: String): String = this?.let { "${it.roundToInt()}$unit" } ?: "—"

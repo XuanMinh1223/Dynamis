@@ -6,6 +6,12 @@
     <string name="low_temperature">Low temperature: %1$s</string>
     <string name="next_24_hours">Next 24 hours</string>
     <string name="hourly_forecast_item">%1$s at %2$s, %3$s</string>
+    <string name="next_16_days">16-day forecast</string>
+    <string name="today">Today</string>
+    <string name="precipitation_chance">%1$d%% rain</string>
+    <string name="daily_forecast_accessibility">%1$s, %2$s. High %3$s, low %4$s.</string>
+    <string name="daily_forecast_rain_accessibility">%1$s, %2$s. High %3$s, low %4$s. %5$d%% chance of rain.</string>
+    <string name="daily_forecast_snow_accessibility">%1$s, %2$s. High %3$s, low %4$s. %5$d%% chance of snow.</string>
     <string name="current_location">Current location</string>
     <string name="location_permission_denied">Allow location access to see the weather near you.</string>
     <string name="location_permission_denied_forever">Enable location access for Dynamis in your device settings, then try again.</string>

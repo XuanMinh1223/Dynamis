@@ -1,8 +1,10 @@
 package org.xuan.dynamis.data.repo
 
 import org.xuan.dynamis.data.source.api.dto.ForecastResponse
+import org.xuan.dynamis.domain.model.DailyForecast
 import org.xuan.dynamis.domain.model.HourlyForecast
 import org.xuan.dynamis.domain.model.WeatherForecast
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 
@@ -48,6 +50,23 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
             }
         }
     }.orEmpty().take(24)
+    val dailyForecasts = daily?.let { dailyData ->
+        dailyData.time.mapIndexedNotNull { index, dateText ->
+            val date = try {
+                LocalDate.parse(dateText)
+            } catch (cause: IllegalArgumentException) {
+                null
+            } ?: return@mapIndexedNotNull null
+            DailyForecast(
+                date = date,
+                high = dailyData.high.getOrNull(index)?.takeIf { it.isFinite() },
+                low = dailyData.low.getOrNull(index)?.takeIf { it.isFinite() },
+                weatherCode = dailyData.weatherCode.getOrNull(index),
+                precipitationProbability =
+                    dailyData.precipitationProbability.getOrNull(index)?.takeIf { it in 0..100 },
+            )
+        }
+    }.orEmpty().take(16)
 
     return WeatherForecast(
         observedAt = observedAt,
@@ -58,5 +77,6 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
         todayHigh = daily?.high?.getOrNull(dateIndex)?.takeIf { it.isFinite() },
         todayLow = daily?.low?.getOrNull(dateIndex)?.takeIf { it.isFinite() },
         hourly = hourlyForecast,
+        dailyForecasts = dailyForecasts,
     )
 }

@@ -36,4 +36,6 @@ data class Daily(
     val time: List<String> = emptyList(),
     @SerialName("temperature_2m_max") val high: List<Double?> = emptyList(),
     @SerialName("temperature_2m_min") val low: List<Double?> = emptyList(),
+    @SerialName("weather_code") val weatherCode: List<Int?> = emptyList(),
+    @SerialName("precipitation_probability_max") val precipitationProbability: List<Int?> = emptyList(),
 )

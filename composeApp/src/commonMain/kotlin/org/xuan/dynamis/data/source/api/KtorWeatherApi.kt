@@ -2,6 +2,7 @@ package org.xuan.dynamis.data.source.api
 
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterNames.CURRENT
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterNames.DAILY
+import org.xuan.dynamis.data.source.api.ApiConstants.ParameterNames.FORECAST_DAYS as FORECAST_DAYS_PARAMETER
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterNames.HOURLY
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterNames.LATITUDE
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterNames.LONGITUDE
@@ -11,6 +12,7 @@ import org.xuan.dynamis.data.source.api.ApiConstants.ParameterValues.CURRENT_VAL
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterValues.DAILY_VALUES
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterValues.DEFAULT_TEMPERATURE_UNIT
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterValues.DEFAULT_TIMEZONE
+import org.xuan.dynamis.data.source.api.ApiConstants.ParameterValues.FORECAST_DAYS as FORECAST_DAYS_VALUE
 import org.xuan.dynamis.data.source.api.ApiConstants.ParameterValues.HOURLY_VALUES
 import org.xuan.dynamis.data.source.api.dto.ForecastResponse
 import io.ktor.client.HttpClient
@@ -26,6 +28,7 @@ class KtorWeatherApi(private val httpClient: HttpClient) : WeatherApi {
                 parameters.append(CURRENT, CURRENT_VALUES)
                 parameters.append(HOURLY, HOURLY_VALUES)
                 parameters.append(DAILY, DAILY_VALUES)
+                parameters.append(FORECAST_DAYS_PARAMETER, FORECAST_DAYS_VALUE)
                 parameters.append(TEMPERATURE_UNIT, DEFAULT_TEMPERATURE_UNIT)
                 parameters.append(TIMEZONE, DEFAULT_TIMEZONE)
             }

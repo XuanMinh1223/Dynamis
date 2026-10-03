@@ -1,5 +1,6 @@
 package org.xuan.dynamis.ui.screen.home
 
+import kotlinx.datetime.LocalDate
 import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherPattern
 
@@ -13,10 +14,20 @@ data class WeatherUiState(
     val todayHigh: String = "—",
     val todayLow: String = "—",
     val hourly: List<HourlyWeatherUiState> = emptyList(),
+    val dailyForecasts: List<DailyWeatherUiState> = emptyList(),
 ) {
     val weatherPattern: WeatherPattern
         get() = WeatherPattern.fromWeatherCode(currentWeatherCode)
 }
+
+data class DailyWeatherUiState(
+    val date: LocalDate,
+    val isToday: Boolean,
+    val highTemperature: String,
+    val lowTemperature: String,
+    val weatherCode: Int?,
+    val precipitationProbability: Int?,
+)
 
 data class HourlyWeatherUiState(
     val time: String,

@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlinx.datetime.LocalDate
 import org.xuan.dynamis.ui.theme.DynamisTheme
 import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherMeshGradientBackground
@@ -54,15 +55,25 @@ private val PreviewWeather =
                 },
             )
         },
+        dailyForecasts = List(16) { index ->
+            DailyWeatherUiState(
+                date = LocalDate(2026, 10, index + 2),
+                isToday = index == 0,
+                highTemperature = "${19 + index % 5}°C",
+                lowTemperature = "${11 + index % 4}°C",
+                weatherCode = if (index % 5 == 3) 61 else 0,
+                precipitationProbability = if (index % 5 == 3) 40 else 10,
+            )
+        },
     )
 
-@Preview(name = "Success - Light", showBackground = true)
+@Preview(name = "Success - Light", widthDp = 420, heightDp = 1100, showBackground = true)
 @Composable
 private fun HomeScreenSuccessLightPreview() {
     PreviewHomeScreen(HomeUiState.Success(PreviewWeather))
 }
 
-@Preview(name = "Success - Dark", showBackground = true)
+@Preview(name = "Success - Dark", widthDp = 420, heightDp = 1100, showBackground = true)
 @Composable
 private fun HomeScreenSuccessDarkPreview() {
     PreviewHomeScreen(
@@ -78,31 +89,31 @@ private fun HomeScreenSuccessDarkPreview() {
     )
 }
 
-@Preview(name = "Success - Dawn", showBackground = true)
+@Preview(name = "Success - Dawn", widthDp = 420, heightDp = 1100, showBackground = true)
 @Composable
 private fun HomeScreenDawnPreview() {
     PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(time = "06:30", timeOfDay = TimeOfDay.Dawn)))
 }
 
-@Preview(name = "Success - Dusk", showBackground = true)
+@Preview(name = "Success - Dusk", widthDp = 420, heightDp = 1100, showBackground = true)
 @Composable
 private fun HomeScreenDuskPreview() {
     PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(time = "18:30", timeOfDay = TimeOfDay.Dusk)))
 }
 
-@Preview(name = "Success - Rain", showBackground = true)
+@Preview(name = "Success - Rain", widthDp = 420, heightDp = 1100, showBackground = true)
 @Composable
 private fun HomeScreenRainPreview() {
     PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(currentWeatherCode = 63)))
 }
 
-@Preview(name = "Success - Snow", showBackground = true)
+@Preview(name = "Success - Snow", widthDp = 420, heightDp = 1100, showBackground = true)
 @Composable
 private fun HomeScreenSnowPreview() {
     PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(currentWeatherCode = 73)))
 }
 
-@Preview(name = "Success - Thunderstorm", showBackground = true)
+@Preview(name = "Success - Thunderstorm", widthDp = 420, heightDp = 1100, showBackground = true)
 @Composable
 private fun HomeScreenThunderstormPreview() {
     PreviewHomeScreen(HomeUiState.Success(PreviewWeather.copy(currentWeatherCode = 95)))

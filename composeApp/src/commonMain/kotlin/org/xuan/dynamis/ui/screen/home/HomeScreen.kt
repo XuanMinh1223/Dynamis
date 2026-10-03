@@ -45,15 +45,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import org.jetbrains.compose.resources.stringResource
 import org.xuan.dynamis.resources.Res
 import org.xuan.dynamis.resources.current_location
+import org.xuan.dynamis.resources.daily_forecast_accessibility
+import org.xuan.dynamis.resources.daily_forecast_rain_accessibility
+import org.xuan.dynamis.resources.daily_forecast_snow_accessibility
 import org.xuan.dynamis.resources.high_temperature
 import org.xuan.dynamis.resources.hourly_forecast_item
 import org.xuan.dynamis.resources.loading_weather
@@ -61,9 +69,12 @@ import org.xuan.dynamis.resources.location_permission_denied
 import org.xuan.dynamis.resources.location_permission_denied_forever
 import org.xuan.dynamis.resources.location_unavailable
 import org.xuan.dynamis.resources.low_temperature
+import org.xuan.dynamis.resources.next_16_days
 import org.xuan.dynamis.resources.next_24_hours
+import org.xuan.dynamis.resources.precipitation_chance
 import org.xuan.dynamis.resources.refresh_weather
 import org.xuan.dynamis.resources.retry
+import org.xuan.dynamis.resources.today
 import org.xuan.dynamis.resources.weather_unavailable
 import org.xuan.dynamis.ui.theme.LocalWeatherColorPalette
 import org.xuan.dynamis.ui.theme.TimeOfDay
@@ -210,6 +221,29 @@ private fun WeatherContent(weather: WeatherUiState) {
                 }
             }
         }
+        if (weather.dailyForecasts.isNotEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.next_16_days),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    itemsIndexed(
+                        items = weather.dailyForecasts,
+                        key = { index, item -> "$index-${item.date}" },
+                    ) { _, day ->
+                        DailyWeatherCard(day, weather.moonPhase)
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -245,7 +279,6 @@ private fun HourlyWeatherCard(
         border = BorderStroke(1.dp, palette.shadow.copy(alpha = 0.22f)),
     ) {
         Box {
-            PaperStockTexture(palette.shadow)
             Column(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 5.dp, vertical = 9.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -265,19 +298,136 @@ private fun HourlyWeatherCard(
 }
 
 @Composable
-private fun PaperStockTexture(shadow: Color) {
-    Canvas(Modifier.fillMaxSize()) {
-        val stroke = 0.7.dp.toPx()
-        for (fiber in 0 until 24) {
-            val x = ((fiber * 47) % 101) / 100f * size.width
-            val y = ((fiber * 73) % 97) / 97f * size.height
-            val length = (8 + fiber % 13).dp.toPx()
-            drawLine(
-                color = shadow.copy(alpha = if (fiber % 3 == 0) 0.10f else 0.045f),
-                start = Offset(x, y),
-                end = Offset((x + length).coerceAtMost(size.width), y + (fiber % 3 - 1) * stroke),
-                strokeWidth = stroke,
+private fun DailyWeatherCard(
+    day: DailyWeatherUiState,
+    moonPhase: Float,
+) {
+    val palette = LocalWeatherColorPalette.current
+    val paper = lerp(Color(0xFFFFF8E9), palette.weatherSecondary, 0.28f)
+    val ink = Color(0xFF203342)
+    val dateLabel =
+        if (day.isToday) {
+            stringResource(Res.string.today)
+        } else {
+            "${day.date.month.ordinal + 1}/${day.date.day}"
+        }
+    val weatherName = WeatherPattern.fromWeatherCode(day.weatherCode).displayName
+    val precipitation = day.precipitationProbability?.takeIf { it >= 30 }
+    val snow = day.weatherCode in 71..77 || day.weatherCode == 85 || day.weatherCode == 86
+    val description =
+        if (precipitation == null) {
+            stringResource(
+                Res.string.daily_forecast_accessibility,
+                dateLabel,
+                weatherName,
+                day.highTemperature,
+                day.lowTemperature,
             )
+        } else if (snow) {
+            stringResource(
+                Res.string.daily_forecast_snow_accessibility,
+                dateLabel,
+                weatherName,
+                day.highTemperature,
+                day.lowTemperature,
+                precipitation,
+            )
+        } else {
+            stringResource(
+                Res.string.daily_forecast_rain_accessibility,
+                dateLabel,
+                weatherName,
+                day.highTemperature,
+                day.lowTemperature,
+                precipitation,
+            )
+        }
+
+    Surface(
+        modifier =
+            Modifier
+                .width(96.dp)
+                .height(158.dp)
+                .semantics(mergeDescendants = true) {
+                    contentDescription = description
+                },
+        shape = RoundedCornerShape(18.dp),
+        color = paper,
+        contentColor = ink,
+        shadowElevation = 4.dp,
+        border = BorderStroke(1.dp, palette.shadow.copy(alpha = 0.22f)),
+    ) {
+        Box {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(dateLabel, style = MaterialTheme.typography.labelMedium)
+                WeatherPaperSymbol(
+                    weatherCode = day.weatherCode,
+                    timeOfDay = TimeOfDay.Day,
+                    moonPhase = moonPhase,
+                    modifier = Modifier.size(width = 82.dp, height = 70.dp),
+                )
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (precipitation != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        ) {
+                            PrecipitationIcon(snow)
+                            Text(
+                                text = stringResource(Res.string.precipitation_chance, precipitation),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF376F85),
+                            )
+                        }
+                    }
+                }
+                Text("↑ ${day.highTemperature}", style = MaterialTheme.typography.labelSmall)
+                Text("↓ ${day.lowTemperature}", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrecipitationIcon(snow: Boolean) {
+    Canvas(Modifier.size(12.dp)) {
+        val tint = Color(0xFF376F85)
+        val centerX = size.width / 2f
+        if (snow) {
+            val center = Offset(centerX, size.height / 2f)
+            val armLength = size.minDimension * 0.44f
+            for (arm in 0 until 3) {
+                val angle = arm * PI.toFloat() / 3f
+                val offset = Offset(cos(angle) * armLength, sin(angle) * armLength)
+                drawLine(
+                    color = tint,
+                    start = center - offset,
+                    end = center + offset,
+                    strokeWidth = 1.4.dp.toPx(),
+                    cap = StrokeCap.Round,
+                )
+            }
+        } else {
+            val drop = Path().apply {
+                moveTo(centerX, 0f)
+                cubicTo(size.width * 0.34f, size.height * 0.38f, size.width * 0.1f, size.height * 0.57f,
+                    size.width * 0.1f, size.height * 0.72f)
+                cubicTo(size.width * 0.1f, size.height * 0.91f, size.width * 0.28f, size.height,
+                    centerX, size.height)
+                cubicTo(size.width * 0.72f, size.height, size.width * 0.9f, size.height * 0.91f,
+                    size.width * 0.9f, size.height * 0.72f)
+                cubicTo(size.width * 0.9f, size.height * 0.57f, size.width * 0.66f, size.height * 0.38f,
+                    centerX, 0f)
+                close()
+            }
+            drawPath(drop, tint)
         }
     }
 }

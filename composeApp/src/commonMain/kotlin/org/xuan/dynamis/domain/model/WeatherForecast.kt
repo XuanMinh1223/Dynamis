@@ -1,5 +1,6 @@
 package org.xuan.dynamis.domain.model
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 
 data class WeatherForecast(
@@ -11,10 +12,19 @@ data class WeatherForecast(
     val todayHigh: Double?,
     val todayLow: Double?,
     val hourly: List<HourlyForecast> = emptyList(),
+    val dailyForecasts: List<DailyForecast> = emptyList(),
 )
 
 data class HourlyForecast(
     val time: LocalDateTime,
     val temperature: Double,
     val weatherCode: Int?,
+)
+
+data class DailyForecast(
+    val date: LocalDate,
+    val high: Double?,
+    val low: Double?,
+    val weatherCode: Int?,
+    val precipitationProbability: Int?,
 )
