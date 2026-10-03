@@ -16,7 +16,6 @@ kotlin {
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -54,6 +53,8 @@ kotlin {
 
             implementation(libs.compass.geocoder)
             implementation(libs.compass.geocoder.mobile)
+
+            implementation(libs.maplibre.compose)
 
             // Geolocation
             implementation(libs.compass.geolocation)

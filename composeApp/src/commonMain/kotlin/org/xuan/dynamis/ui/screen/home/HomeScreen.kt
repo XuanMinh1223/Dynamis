@@ -87,6 +87,7 @@ fun HomeScreen(
     state: HomeUiState,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    radarContent: @Composable () -> Unit = {},
 ) {
     val weather = (state as? HomeUiState.Success)?.weather
     WeatherMeshGradientBackground(
@@ -156,7 +157,7 @@ fun HomeScreen(
                     visible = state is HomeUiState.Success,
                     enter = slideInVertically(tween(500)) { it } + fadeIn(tween(500)),
                 ) {
-                    if (state is HomeUiState.Success) WeatherContent(state.weather)
+                    if (state is HomeUiState.Success) WeatherContent(state.weather, radarContent)
                 }
             }
         }
@@ -164,7 +165,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun WeatherContent(weather: WeatherUiState) {
+private fun WeatherContent(weather: WeatherUiState, radarContent: @Composable () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -244,6 +245,7 @@ private fun WeatherContent(weather: WeatherUiState) {
                 }
             }
         }
+        Box(Modifier.fillMaxWidth().padding(top = 12.dp)) { radarContent() }
     }
 }
 
