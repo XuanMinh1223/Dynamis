@@ -77,12 +77,6 @@ private fun ReadyPreview(state: RadarUiState.Ready, onOpen: () -> Unit) {
             locationColor = LocalWeatherColorPalette.current.background,
             modifier = Modifier.fillMaxSize(),
         )
-        // Sits above the map so taps open the full screen instead of reaching the native map view.
-        Box(
-            Modifier.fillMaxSize()
-                .semantics { contentDescription = description }
-                .clickable(role = Role.Button, onClick = onOpen),
-        )
         Surface(
             modifier = Modifier.align(Alignment.TopStart).padding(10.dp),
             shape = RoundedCornerShape(50),
@@ -110,6 +104,12 @@ private fun ReadyPreview(state: RadarUiState.Ready, onOpen: () -> Unit) {
             text = stringResource(Res.string.radar_attribution),
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+        )
+        // Drawn last so it sits above the map and the pills (a Surface swallows taps) and every tap opens the radar.
+        Box(
+            Modifier.fillMaxSize()
+                .semantics { contentDescription = description }
+                .clickable(role = Role.Button, onClick = onOpen),
         )
     }
 }
