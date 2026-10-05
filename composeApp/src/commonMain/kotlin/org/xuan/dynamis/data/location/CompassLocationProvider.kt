@@ -8,13 +8,14 @@ import dev.jordond.compass.geocoder.Geocoder
 import dev.jordond.compass.geocoder.placeOrNull
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.GeolocatorResult
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeoutOrNull
 import org.xuan.dynamis.domain.LocationException
 import org.xuan.dynamis.domain.LocationFailure
 import org.xuan.dynamis.domain.LocationProvider
 import org.xuan.dynamis.domain.model.GeoCoordinates
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
 class CompassLocationProvider(
     private val geolocator: Geolocator,
@@ -37,11 +38,17 @@ class CompassLocationProvider(
             val result = lastKnownFix() ?: freshFix()
             return when (result) {
                 is GeolocatorResult.Success -> remember(result)
+
                 is GeolocatorResult.PermissionDenied -> throw LocationException(
-                    if (result.forever) LocationFailure.PermissionDeniedForever
-                    else LocationFailure.PermissionDenied,
+                    if (result.forever) {
+                        LocationFailure.PermissionDeniedForever
+                    } else {
+                        LocationFailure.PermissionDenied
+                    },
                 )
+
                 null -> throw LocationException(LocationFailure.Timeout, "no fix within ${FRESH_FIX_TIMEOUT_MILLIS}ms")
+
                 else -> throw LocationException(LocationFailure.Unavailable, "geolocator returned $result")
             }
         } catch (cause: CancellationException) {
@@ -55,13 +62,17 @@ class CompassLocationProvider(
 
     /** The OS's cached fix if it is recent enough, or a permission denial; otherwise null. */
     private suspend fun lastKnownFix(): GeolocatorResult? {
-        val result = withTimeoutOrNull(LAST_KNOWN_TIMEOUT_MILLIS) { geolocator.lastLocation(Priority.LowPower) }
-        return when {
-            result is GeolocatorResult.PermissionDenied -> result
-            result is GeolocatorResult.Success && result.data.isRecent() -> {
+        val result = withTimeoutOrNull(LAST_KNOWN_TIMEOUT_MILLIS.milliseconds) { geolocator.lastLocation(Priority.LowPower) }
+        return when (result) {
+            is GeolocatorResult.PermissionDenied -> {
+                result
+            }
+
+            is GeolocatorResult.Success if result.data.isRecent() -> {
                 log.d { "Using the OS's last known location" }
                 result
             }
+
             else -> {
                 log.d { "No usable last known location (${result?.let { it::class.simpleName } ?: "timed out"}); requesting a fresh fix" }
                 null
@@ -70,7 +81,7 @@ class CompassLocationProvider(
     }
 
     private suspend fun freshFix(): GeolocatorResult? =
-        withTimeoutOrNull(FRESH_FIX_TIMEOUT_MILLIS) { geolocator.current(Priority.Balanced) }
+        withTimeoutOrNull(FRESH_FIX_TIMEOUT_MILLIS.milliseconds) { geolocator.current(Priority.Balanced) }
             .also { log.d { "Fresh location fix: ${it?.let { r -> r::class.simpleName } ?: "timed out"}" } }
 
     private fun remember(result: GeolocatorResult.Success): GeoCoordinates {
@@ -79,10 +90,12 @@ class CompassLocationProvider(
         return coordinates
     }
 
-    private fun Location.isRecent() =
-        Clock.System.now().toEpochMilliseconds() - timestampMillis <= LAST_KNOWN_MAX_AGE_MILLIS
+    private fun Location.isRecent() = Clock.System.now().toEpochMilliseconds() - timestampMillis <= LAST_KNOWN_MAX_AGE_MILLIS
 
-    private class CachedFix(val coordinates: GeoCoordinates, val savedAtMillis: Long) {
+    private class CachedFix(
+        val coordinates: GeoCoordinates,
+        val savedAtMillis: Long,
+    ) {
         fun isFresh(maxAgeMillis: Long) = Clock.System.now().toEpochMilliseconds() - savedAtMillis <= maxAgeMillis
     }
 
@@ -95,15 +108,19 @@ class CompassLocationProvider(
 
     override suspend fun locality(coordinates: GeoCoordinates): String? {
         return try {
-            val place = withTimeoutOrNull(5_000) {
-                geocoder.placeOrNull(Coordinates(coordinates.latitude, coordinates.longitude))
-            }
+            val place =
+                withTimeoutOrNull(5_000.milliseconds) {
+                    geocoder.placeOrNull(Coordinates(coordinates.latitude, coordinates.longitude))
+                }
             if (place == null) {
                 log.w { "Reverse geocoding found no place for $coordinates (timeout or no result)" }
                 return null
             }
             listOfNotNull(place.locality, place.administrativeArea)
-                .filter { it.isNotBlank() }.distinct().joinToString(", ").ifBlank { null }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .joinToString(", ")
+                .ifBlank { null }
         } catch (cause: CancellationException) {
             throw cause
         } catch (cause: Exception) {
