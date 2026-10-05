@@ -19,6 +19,7 @@ import org.maplibre.compose.sources.TileSetOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.sources.rememberRasterSource
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.compose.util.MaplibreComposable
 import org.maplibre.spatialk.geojson.Position
 import org.xuan.dynamis.data.repo.radarCoverageTileUrl
 import org.xuan.dynamis.data.repo.radarTileUrl
@@ -84,6 +85,7 @@ internal fun RadarMap(
 }
 
 @Composable
+@MaplibreComposable
 private fun CoverageLayer(host: String) {
     val source = rememberRasterSource(
         tiles = listOf(radarCoverageTileUrl(host)),
@@ -95,6 +97,7 @@ private fun CoverageLayer(host: String) {
 }
 
 @Composable
+@MaplibreComposable
 private fun RadarFrameLayer(frame: RadarFrame, options: RadarTileOptions, visible: Boolean) {
     val source = rememberRasterSource(
         tiles = listOf(radarTileUrl(frame, options)),
@@ -113,6 +116,7 @@ private fun RadarFrameLayer(frame: RadarFrame, options: RadarTileOptions, visibl
 }
 
 @Composable
+@MaplibreComposable
 private fun LocationDot(location: GeoCoordinates, color: Color) {
     val source = rememberGeoJsonSource(
         GeoJsonData.JsonString("""{"type":"Point","coordinates":[${location.longitude},${location.latitude}]}"""),

@@ -2,6 +2,8 @@ package org.xuan.dynamis.data.location
 
 import co.touchlab.kermit.Logger
 import dev.jordond.compass.Coordinates
+import dev.jordond.compass.Location
+import dev.jordond.compass.Priority
 import dev.jordond.compass.geocoder.Geocoder
 import dev.jordond.compass.geocoder.placeOrNull
 import dev.jordond.compass.geolocation.Geolocator
@@ -12,6 +14,7 @@ import org.xuan.dynamis.domain.LocationProvider
 import org.xuan.dynamis.domain.model.GeoCoordinates
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Clock
 
 class CompassLocationProvider(
     private val geolocator: Geolocator,
@@ -19,18 +22,23 @@ class CompassLocationProvider(
 ) : LocationProvider {
     private val log = Logger.withTag("Location")
 
+    private var cachedFix: CachedFix? = null
+
     override suspend fun currentLocation(): GeoCoordinates {
         try {
-            return when (val result = withTimeoutOrNull(20_000) { geolocator.current() }) {
-                null -> throw LocationException(LocationFailure.Timeout, "no fix within 20s")
-                is GeolocatorResult.Success -> GeoCoordinates(
-                    result.data.coordinates.latitude,
-                    result.data.coordinates.longitude,
-                )
+            // The home and radar screens both ask; share one fix rather than waking the GPS twice.
+            cachedFix?.takeIf { it.isFresh(MEMORY_CACHE_MILLIS) }?.let { return it.coordinates }
+
+            // A forecast only needs city-level accuracy, so the OS's last known fix is plenty and
+            // arrives instantly. Only fall back to a fresh fix (slow indoors) when there isn't one.
+            val result = lastKnownFix() ?: freshFix()
+            return when (result) {
+                is GeolocatorResult.Success -> remember(result)
                 is GeolocatorResult.PermissionDenied -> throw LocationException(
                     if (result.forever) LocationFailure.PermissionDeniedForever
                     else LocationFailure.PermissionDenied,
                 )
+                null -> throw LocationException(LocationFailure.Timeout, "no fix within ${FRESH_FIX_TIMEOUT_MILLIS}ms")
                 else -> throw LocationException(LocationFailure.Unavailable, "geolocator returned $result")
             }
         } catch (cause: CancellationException) {
@@ -40,6 +48,39 @@ class CompassLocationProvider(
         } catch (cause: Exception) {
             throw LocationException(LocationFailure.Unavailable, cause = cause)
         }
+    }
+
+    /** The OS's cached fix if it is recent enough, or a permission denial; otherwise null. */
+    private suspend fun lastKnownFix(): GeolocatorResult? {
+        val result = withTimeoutOrNull(LAST_KNOWN_TIMEOUT_MILLIS) { geolocator.lastLocation(Priority.LowPower) }
+        return when {
+            result is GeolocatorResult.PermissionDenied -> result
+            result is GeolocatorResult.Success && result.data.isRecent() -> result
+            else -> null
+        }
+    }
+
+    private suspend fun freshFix(): GeolocatorResult? =
+        withTimeoutOrNull(FRESH_FIX_TIMEOUT_MILLIS) { geolocator.current(Priority.Balanced) }
+
+    private fun remember(result: GeolocatorResult.Success): GeoCoordinates {
+        val coordinates = GeoCoordinates(result.data.coordinates.latitude, result.data.coordinates.longitude)
+        cachedFix = CachedFix(coordinates, Clock.System.now().toEpochMilliseconds())
+        return coordinates
+    }
+
+    private fun Location.isRecent() =
+        Clock.System.now().toEpochMilliseconds() - timestampMillis <= LAST_KNOWN_MAX_AGE_MILLIS
+
+    private class CachedFix(val coordinates: GeoCoordinates, val savedAtMillis: Long) {
+        fun isFresh(maxAgeMillis: Long) = Clock.System.now().toEpochMilliseconds() - savedAtMillis <= maxAgeMillis
+    }
+
+    private companion object {
+        const val MEMORY_CACHE_MILLIS = 5 * 60_000L
+        const val LAST_KNOWN_MAX_AGE_MILLIS = 30 * 60_000L
+        const val LAST_KNOWN_TIMEOUT_MILLIS = 3_000L
+        const val FRESH_FIX_TIMEOUT_MILLIS = 20_000L
     }
 
     override suspend fun locality(coordinates: GeoCoordinates): String? {
