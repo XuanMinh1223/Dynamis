@@ -1,5 +1,6 @@
 package org.xuan.dynamis.data.repo
 
+import co.touchlab.kermit.Logger
 import org.xuan.dynamis.data.source.api.dto.ForecastResponse
 import org.xuan.dynamis.domain.model.DailyForecast
 import org.xuan.dynamis.domain.model.HourlyForecast
@@ -36,6 +37,7 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
             val forecastTime = try {
                 LocalDateTime.parse(timestamp)
             } catch (cause: IllegalArgumentException) {
+                Logger.withTag("ForecastMapper").w(cause) { "Skipping hourly entry $index with invalid time '$timestamp'" }
                 null
             }
             val forecastTemperature = hourlyData.temperature.getOrNull(index)?.takeIf { it.isFinite() }
@@ -55,6 +57,7 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
             val date = try {
                 LocalDate.parse(dateText)
             } catch (cause: IllegalArgumentException) {
+                Logger.withTag("ForecastMapper").w(cause) { "Skipping daily entry $index with invalid date '$dateText'" }
                 null
             } ?: return@mapIndexedNotNull null
             DailyForecast(

@@ -45,7 +45,7 @@ class CompassLocationProviderTest {
         val exception = assertFailsWith<LocationException> {
             provider { awaitCancellation() }.currentLocation()
         }
-        assertEquals(LocationFailure.Unavailable, exception.reason)
+        assertEquals(LocationFailure.Timeout, exception.reason)
     }
 
     @Test

@@ -67,6 +67,7 @@ import org.xuan.dynamis.resources.hourly_forecast_item
 import org.xuan.dynamis.resources.loading_weather
 import org.xuan.dynamis.resources.location_permission_denied
 import org.xuan.dynamis.resources.location_permission_denied_forever
+import org.xuan.dynamis.resources.location_timeout
 import org.xuan.dynamis.resources.location_unavailable
 import org.xuan.dynamis.resources.low_temperature
 import org.xuan.dynamis.resources.next_16_days
@@ -75,6 +76,8 @@ import org.xuan.dynamis.resources.precipitation_chance
 import org.xuan.dynamis.resources.refresh_weather
 import org.xuan.dynamis.resources.retry
 import org.xuan.dynamis.resources.today
+import org.xuan.dynamis.resources.weather_data_invalid
+import org.xuan.dynamis.resources.weather_server_error
 import org.xuan.dynamis.resources.weather_unavailable
 import org.xuan.dynamis.ui.theme.LocalWeatherColorPalette
 import org.xuan.dynamis.ui.theme.TimeOfDay
@@ -143,7 +146,10 @@ fun HomeScreen(
                                 HomeError.PermissionDenied -> Res.string.location_permission_denied
                                 HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
                                 HomeError.LocationUnavailable -> Res.string.location_unavailable
+                                HomeError.LocationTimeout -> Res.string.location_timeout
                                 HomeError.WeatherUnavailable -> Res.string.weather_unavailable
+                                HomeError.WeatherServerError -> Res.string.weather_server_error
+                                HomeError.WeatherDataInvalid -> Res.string.weather_data_invalid
                             }
                         Text(stringResource(message), textAlign = TextAlign.Center)
                         Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }

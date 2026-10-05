@@ -15,6 +15,7 @@ ktor = "3.6.0"
 coroutines = "1.11.0"
 datetime = "0.8.0"
 compass = "4.0.1"
+kermit = "2.0.8"
 # Held back: 0.14+ has a large API rewrite (new packages, CameraState/rememberRasterSource/MapOptions moved); needs a RadarMap migration.
 maplibre-compose = "0.13.1"
 
@@ -47,6 +48,7 @@ compass-geocoder = { module = "dev.jordond.compass:geocoder", version.ref = "com
 compass-geocoder-mobile = { module = "dev.jordond.compass:geocoder-mobile", version.ref = "compass" }
 compass-geolocation = { module = "dev.jordond.compass:geolocation", version.ref = "compass" }
 compass-geolocation-mobile = { module = "dev.jordond.compass:geolocation-mobile", version.ref = "compass" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

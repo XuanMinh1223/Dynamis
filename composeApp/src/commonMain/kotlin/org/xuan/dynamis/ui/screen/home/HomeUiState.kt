@@ -10,5 +10,8 @@ enum class HomeError {
     PermissionDenied,
     PermissionDeniedForever,
     LocationUnavailable,
+    LocationTimeout,
     WeatherUnavailable,
+    WeatherServerError,
+    WeatherDataInvalid,
 }

@@ -62,6 +62,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.json)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kermit)
 
             implementation(libs.compass.geocoder)
             implementation(libs.compass.geocoder.mobile)

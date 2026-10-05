@@ -10,8 +10,9 @@ interface LocationProvider {
 enum class LocationFailure {
     PermissionDenied,
     PermissionDeniedForever,
+    Timeout,
     Unavailable,
 }
 
-class LocationException(val reason: LocationFailure, cause: Throwable? = null) :
-    Exception("Location request failed: $reason", cause)
+class LocationException(val reason: LocationFailure, detail: String? = null, cause: Throwable? = null) :
+    Exception(listOfNotNull("Location request failed: $reason", detail).joinToString(" - "), cause)
