@@ -49,7 +49,12 @@ class HomeViewModel(
                 throw cause
             } catch (cause: LocationException) {
                 ensureActive()
-                log.e(cause) { "Could not determine location (${cause.reason})" }
+                // A denied permission is a normal user choice, not a fault.
+                when (cause.reason) {
+                    LocationFailure.PermissionDenied, LocationFailure.PermissionDeniedForever ->
+                        log.w { "Location unavailable (${cause.reason})" }
+                    else -> log.e(cause) { "Could not determine location (${cause.reason})" }
+                }
                 _uiState.value = HomeUiState.Error(
                     when (cause.reason) {
                         LocationFailure.PermissionDenied -> HomeError.PermissionDenied

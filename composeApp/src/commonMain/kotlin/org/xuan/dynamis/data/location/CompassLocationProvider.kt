@@ -27,7 +27,10 @@ class CompassLocationProvider(
     override suspend fun currentLocation(): GeoCoordinates {
         try {
             // The home and radar screens both ask; share one fix rather than waking the GPS twice.
-            cachedFix?.takeIf { it.isFresh(MEMORY_CACHE_MILLIS) }?.let { return it.coordinates }
+            cachedFix?.takeIf { it.isFresh(MEMORY_CACHE_MILLIS) }?.let {
+                log.d { "Using in-memory location fix" }
+                return it.coordinates
+            }
 
             // A forecast only needs city-level accuracy, so the OS's last known fix is plenty and
             // arrives instantly. Only fall back to a fresh fix (slow indoors) when there isn't one.
@@ -55,13 +58,20 @@ class CompassLocationProvider(
         val result = withTimeoutOrNull(LAST_KNOWN_TIMEOUT_MILLIS) { geolocator.lastLocation(Priority.LowPower) }
         return when {
             result is GeolocatorResult.PermissionDenied -> result
-            result is GeolocatorResult.Success && result.data.isRecent() -> result
-            else -> null
+            result is GeolocatorResult.Success && result.data.isRecent() -> {
+                log.d { "Using the OS's last known location" }
+                result
+            }
+            else -> {
+                log.d { "No usable last known location (${result?.let { it::class.simpleName } ?: "timed out"}); requesting a fresh fix" }
+                null
+            }
         }
     }
 
     private suspend fun freshFix(): GeolocatorResult? =
         withTimeoutOrNull(FRESH_FIX_TIMEOUT_MILLIS) { geolocator.current(Priority.Balanced) }
+            .also { log.d { "Fresh location fix: ${it?.let { r -> r::class.simpleName } ?: "timed out"}" } }
 
     private fun remember(result: GeolocatorResult.Success): GeoCoordinates {
         val coordinates = GeoCoordinates(result.data.coordinates.latitude, result.data.coordinates.longitude)

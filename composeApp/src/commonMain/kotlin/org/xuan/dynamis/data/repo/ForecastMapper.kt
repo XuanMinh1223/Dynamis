@@ -12,6 +12,8 @@ import kotlinx.datetime.TimeZone
 class InvalidForecastException(message: String, cause: Throwable? = null) :
     IllegalArgumentException(message, cause)
 
+private val log = Logger.withTag("ForecastMapper")
+
 fun ForecastResponse.toWeatherForecast(): WeatherForecast {
     val current = current ?: throw InvalidForecastException("Current weather is missing")
     val timestamp = current.time ?: throw InvalidForecastException("Observation time is missing")
@@ -37,7 +39,7 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
             val forecastTime = try {
                 LocalDateTime.parse(timestamp)
             } catch (cause: IllegalArgumentException) {
-                Logger.withTag("ForecastMapper").w(cause) { "Skipping hourly entry $index with invalid time '$timestamp'" }
+                log.w(cause) { "Skipping hourly entry $index with invalid time '$timestamp'" }
                 null
             }
             val forecastTemperature = hourlyData.temperature.getOrNull(index)?.takeIf { it.isFinite() }
@@ -57,7 +59,7 @@ fun ForecastResponse.toWeatherForecast(): WeatherForecast {
             val date = try {
                 LocalDate.parse(dateText)
             } catch (cause: IllegalArgumentException) {
-                Logger.withTag("ForecastMapper").w(cause) { "Skipping daily entry $index with invalid date '$dateText'" }
+                log.w(cause) { "Skipping daily entry $index with invalid date '$dateText'" }
                 null
             } ?: return@mapIndexedNotNull null
             DailyForecast(
