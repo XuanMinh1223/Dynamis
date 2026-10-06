@@ -42,6 +42,7 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.compose.ui.tooling)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

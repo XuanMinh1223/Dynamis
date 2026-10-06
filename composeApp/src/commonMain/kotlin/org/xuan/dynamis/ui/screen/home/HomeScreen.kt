@@ -1,9 +1,5 @@
 package org.xuan.dynamis.ui.screen.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +28,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -41,6 +36,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -79,6 +79,8 @@ import org.xuan.dynamis.resources.today
 import org.xuan.dynamis.resources.weather_data_invalid
 import org.xuan.dynamis.resources.weather_server_error
 import org.xuan.dynamis.resources.weather_unavailable
+import org.xuan.dynamis.ui.component.SkeletonClockProvider
+import org.xuan.dynamis.ui.component.SkeletonContainer
 import org.xuan.dynamis.ui.theme.LocalWeatherColorPalette
 import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherMeshGradientBackground
@@ -93,9 +95,14 @@ fun HomeScreen(
     radarContent: @Composable () -> Unit = {},
 ) {
     val weather = (state as? HomeUiState.Success)?.weather
+    // Keep the previous weather on screen while refreshing, so the background and content fade
+    // into the skeleton instead of jumping to a neutral state.
+    var lastWeather by remember { mutableStateOf<WeatherUiState?>(null) }
+    LaunchedEffect(weather) { if (weather != null) lastWeather = weather }
+    val shownWeather = weather ?: lastWeather
     WeatherMeshGradientBackground(
-        pattern = weather?.weatherPattern ?: WeatherPattern.Unknown,
-        timeOfDay = weather?.timeOfDay ?: TimeOfDay.Day,
+        pattern = shownWeather?.weatherPattern ?: WeatherPattern.Unknown,
+        timeOfDay = shownWeather?.timeOfDay ?: TimeOfDay.Day,
         modifier = modifier,
     ) {
         // Keep content clear of camera cutouts and system bars while the background fills the screen.
@@ -103,67 +110,62 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),
             contentAlignment = Alignment.TopCenter,
         ) {
-            Column(
-                modifier =
-                    Modifier
-                        .widthIn(max = 600.dp)
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+            SkeletonClockProvider {
+                Column(
+                    modifier =
+                        Modifier
+                            .widthIn(max = 600.dp)
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Icon(Icons.Rounded.LocationOn, contentDescription = null, modifier = Modifier.size(32.dp))
-                    IconButton(
-                        onClick = onRetry,
-                        enabled = state is HomeUiState.Success,
-                        colors =
-                            IconButtonDefaults.iconButtonColors(
-                                contentColor = LocalContentColor.current,
-                                disabledContentColor = LocalContentColor.current.copy(alpha = 0.38f),
-                            ),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh_weather))
+                        Icon(Icons.Rounded.LocationOn, contentDescription = null, modifier = Modifier.size(32.dp))
+                        IconButton(
+                            onClick = onRetry,
+                            enabled = state is HomeUiState.Success,
+                            colors =
+                                IconButtonDefaults.iconButtonColors(
+                                    contentColor = LocalContentColor.current,
+                                    disabledContentColor = LocalContentColor.current.copy(alpha = 0.38f),
+                                ),
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh_weather))
+                        }
                     }
-                }
-                when (state) {
-                    HomeUiState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(16.dp),
-                            color = LocalContentColor.current,
+                    when (state) {
+                        is HomeUiState.Error -> {
+                            val message =
+                                when (state.reason) {
+                                    HomeError.PermissionDenied -> Res.string.location_permission_denied
+                                    HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
+                                    HomeError.LocationUnavailable -> Res.string.location_unavailable
+                                    HomeError.LocationTimeout -> Res.string.location_timeout
+                                    HomeError.WeatherUnavailable -> Res.string.weather_unavailable
+                                    HomeError.WeatherServerError -> Res.string.weather_server_error
+                                    HomeError.WeatherDataInvalid -> Res.string.weather_data_invalid
+                                }
+                            Text(stringResource(message), textAlign = TextAlign.Center)
+                            Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+                        }
+
+                        else -> Unit
+                    }
+                    // Loading renders the same layout as Success (placeholder data, hidden behind
+                    // skeleton blocks) so the crossfade to real data doesn't move anything.
+                    if (state !is HomeUiState.Error) {
+                        WeatherContent(
+                            weather = shownWeather ?: PlaceholderWeather,
+                            isLoading = state is HomeUiState.Loading,
+                            radarContent = radarContent,
                         )
-                        Text(stringResource(Res.string.loading_weather))
                     }
-
-                    is HomeUiState.Error -> {
-                        val message =
-                            when (state.reason) {
-                                HomeError.PermissionDenied -> Res.string.location_permission_denied
-                                HomeError.PermissionDeniedForever -> Res.string.location_permission_denied_forever
-                                HomeError.LocationUnavailable -> Res.string.location_unavailable
-                                HomeError.LocationTimeout -> Res.string.location_timeout
-                                HomeError.WeatherUnavailable -> Res.string.weather_unavailable
-                                HomeError.WeatherServerError -> Res.string.weather_server_error
-                                HomeError.WeatherDataInvalid -> Res.string.weather_data_invalid
-                            }
-                        Text(stringResource(message), textAlign = TextAlign.Center)
-                        Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
-                    }
-
-                    is HomeUiState.Success -> {
-                        Unit
-                    }
-                }
-                AnimatedVisibility(
-                    visible = state is HomeUiState.Success,
-                    enter = slideInVertically(tween(500)) { it } + fadeIn(tween(500)),
-                ) {
-                    if (state is HomeUiState.Success) WeatherContent(state.weather, radarContent)
                 }
             }
         }
@@ -171,39 +173,58 @@ fun HomeScreen(
 }
 
 @Composable
-private fun WeatherContent(weather: WeatherUiState, radarContent: @Composable () -> Unit) {
+private fun WeatherContent(weather: WeatherUiState, isLoading: Boolean, radarContent: @Composable () -> Unit) {
+    val loadingDescription = stringResource(Res.string.loading_weather)
+    val textShape = RoundedCornerShape(6.dp)
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(if (isLoading) Modifier.semantics { contentDescription = loadingDescription } else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            weather.locality.ifBlank { stringResource(Res.string.current_location) },
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-        )
-        Text(weather.time, style = MaterialTheme.typography.labelMedium)
-        WeatherPaperSymbol(weather.currentWeatherCode, weather.timeOfDay, weather.moonPhase)
-        Text(weather.currentTemperature, style = MaterialTheme.typography.displayLarge)
+        SkeletonContainer(isLoading, placeholderShape = textShape) {
+            Text(
+                weather.locality.ifBlank { stringResource(Res.string.current_location) },
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+            )
+        }
+        SkeletonContainer(isLoading, placeholderShape = textShape) {
+            Text(weather.time, style = MaterialTheme.typography.labelMedium)
+        }
+        SkeletonContainer(isLoading, placeholderShape = RoundedCornerShape(24.dp)) {
+            WeatherPaperSymbol(weather.currentWeatherCode, weather.timeOfDay, weather.moonPhase)
+        }
+        SkeletonContainer(isLoading, placeholderShape = textShape) {
+            Text(weather.currentTemperature, style = MaterialTheme.typography.displayLarge)
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TemperatureReading(
-                weather.todayHigh,
-                Icons.Default.KeyboardArrowUp,
-                stringResource(Res.string.high_temperature, weather.todayHigh),
-            )
-            Text(
-                text = weather.weatherPattern.displayName,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            TemperatureReading(
-                weather.todayLow,
-                Icons.Default.KeyboardArrowDown,
-                stringResource(Res.string.low_temperature, weather.todayLow),
-            )
+            SkeletonContainer(isLoading, placeholderShape = textShape) {
+                TemperatureReading(
+                    weather.todayHigh,
+                    Icons.Default.KeyboardArrowUp,
+                    stringResource(Res.string.high_temperature, weather.todayHigh),
+                )
+            }
+            SkeletonContainer(isLoading, placeholderShape = textShape) {
+                Text(
+                    text = weather.weatherPattern.displayName,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            SkeletonContainer(isLoading, placeholderShape = textShape) {
+                TemperatureReading(
+                    weather.todayLow,
+                    Icons.Default.KeyboardArrowDown,
+                    stringResource(Res.string.low_temperature, weather.todayLow),
+                )
+            }
         }
         if (weather.hourly.isNotEmpty()) {
             Column(
@@ -219,11 +240,11 @@ private fun WeatherContent(weather: WeatherUiState, radarContent: @Composable ()
                     contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    itemsIndexed(
-                        items = weather.hourly,
-                        key = { index, item -> "$index-${item.time}" },
-                    ) { _, hour ->
-                        HourlyWeatherCard(hour, weather.moonPhase)
+                    // Keyed by position so each card survives the placeholder -> data swap and can crossfade.
+                    itemsIndexed(items = weather.hourly, key = { index, _ -> index }) { index, hour ->
+                        SkeletonContainer(isLoading, placeholderShape = CardShape, index = index) {
+                            HourlyWeatherCard(hour, weather.moonPhase)
+                        }
                     }
                 }
             }
@@ -242,18 +263,23 @@ private fun WeatherContent(weather: WeatherUiState, radarContent: @Composable ()
                     contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    itemsIndexed(
-                        items = weather.dailyForecasts,
-                        key = { index, item -> "$index-${item.date}" },
-                    ) { _, day ->
-                        DailyWeatherCard(day, weather.moonPhase)
+                    itemsIndexed(items = weather.dailyForecasts, key = { index, _ -> index }) { index, day ->
+                        SkeletonContainer(isLoading, placeholderShape = CardShape, index = index) {
+                            DailyWeatherCard(day, weather.moonPhase)
+                        }
                     }
                 }
             }
         }
-        Box(Modifier.fillMaxWidth().padding(top = 12.dp)) { radarContent() }
+        SkeletonContainer(
+            isLoading,
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            placeholderShape = CardShape,
+        ) { radarContent() }
     }
 }
+
+private val CardShape = RoundedCornerShape(18.dp)
 
 @Composable
 private fun HourlyWeatherCard(
@@ -280,7 +306,7 @@ private fun HourlyWeatherCard(
                 .semantics(mergeDescendants = true) {
                     contentDescription = description
                 },
-        shape = RoundedCornerShape(18.dp),
+        shape = CardShape,
         color = paper,
         contentColor = ink,
         shadowElevation = 4.dp,
@@ -359,7 +385,7 @@ private fun DailyWeatherCard(
                 .semantics(mergeDescendants = true) {
                     contentDescription = description
                 },
-        shape = RoundedCornerShape(18.dp),
+        shape = CardShape,
         color = paper,
         contentColor = ink,
         shadowElevation = 4.dp,

@@ -38,3 +38,27 @@ data class HourlyWeatherUiState(
     val timeOfDay: TimeOfDay
         get() = TimeOfDay.fromHour(hour)
 }
+
+/**
+ * Stand-in data for the loading state. Never visible: it only gives the skeleton the same
+ * layout (text widths, card counts) as typical loaded data, so the crossfade moves nothing.
+ */
+internal val PlaceholderWeather = WeatherUiState(
+    locality = "Placeholder City",
+    time = "00:00",
+    currentTemperature = "00°C",
+    currentWeatherCode = 2,
+    todayHigh = "00°C",
+    todayLow = "00°C",
+    hourly = List(24) { HourlyWeatherUiState("00:00", hour = 12, temperature = "00°C", weatherCode = 2) },
+    dailyForecasts = List(16) {
+        DailyWeatherUiState(
+            date = LocalDate(2000, 1, 1),
+            isToday = false,
+            highTemperature = "00°C",
+            lowTemperature = "00°C",
+            weatherCode = 2,
+            precipitationProbability = null,
+        )
+    },
+)
