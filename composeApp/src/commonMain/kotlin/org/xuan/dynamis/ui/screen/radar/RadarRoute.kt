@@ -12,7 +12,10 @@ import org.xuan.dynamis.ui.theme.weatherColorPalette
 
 /** The home-screen radar preview; [onOpen] navigates to the full screen. */
 @Composable
-fun RadarSection(onOpen: () -> Unit, viewModel: RadarViewModel = koinViewModel()) {
+fun RadarSection(
+    onOpen: () -> Unit,
+    viewModel: RadarViewModel = koinViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     RadarPreviewCard(state = state, onRetry = viewModel::load, onOpen = onOpen)
 }
@@ -29,15 +32,16 @@ fun RadarRoute(
     CompositionLocalProvider(LocalWeatherColorPalette provides weatherColorPalette(pattern, timeOfDay)) {
         RadarScreen(
             state = state,
-            actions = RadarActions(
-                onBack = onBack,
-                onRetry = viewModel::load,
-                onTogglePlayback = viewModel::togglePlayback,
-                onSelectFrame = viewModel::selectFrame,
-                onSmoothChange = viewModel::setSmooth,
-                onSnowChange = viewModel::setSnow,
-                onCoverageChange = viewModel::setShowCoverage,
-            ),
+            actions =
+                RadarActions(
+                    onBack = onBack,
+                    onRetry = viewModel::load,
+                    onTogglePlayback = viewModel::togglePlayback,
+                    onSelectFrame = viewModel::selectFrame,
+                    onSmoothChange = viewModel::setSmooth,
+                    onSnowChange = viewModel::setSnow,
+                    onCoverageChange = viewModel::setShowCoverage,
+                ),
         )
     }
 }

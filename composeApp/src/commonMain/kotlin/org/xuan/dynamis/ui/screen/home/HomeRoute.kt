@@ -9,9 +9,15 @@ import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherPattern
 
 @Composable
-fun HomeRoute(onOpenRadar: (WeatherPattern, TimeOfDay) -> Unit, viewModel: HomeViewModel = koinViewModel()) {
+fun HomeRoute(
+    onOpenRadar: (WeatherPattern, TimeOfDay) -> Unit,
+    viewModel: HomeViewModel = koinViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeScreen(state = state, onRetry = viewModel::refresh, radarContent = {
+    HomeScreen(
+        state = state,
+        onRetry = viewModel::refresh,
+        radarContent = {
             val weather = (state as? HomeUiState.Success)?.weather
             RadarSection(
                 onOpen = {

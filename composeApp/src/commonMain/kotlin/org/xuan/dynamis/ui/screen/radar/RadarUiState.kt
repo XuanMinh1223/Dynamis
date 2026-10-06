@@ -6,7 +6,9 @@ import org.xuan.dynamis.domain.model.RadarTileOptions
 
 sealed interface RadarUiState {
     data object Loading : RadarUiState
+
     data object Error : RadarUiState
+
     data class Ready(
         val frames: List<RadarFrame>,
         val selectedIndex: Int,

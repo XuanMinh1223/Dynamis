@@ -41,30 +41,33 @@ private val PreviewWeather =
         timeOfDay = TimeOfDay.Day,
         todayHigh = "22°C",
         todayLow = "12°C",
-        hourly = List(24) { index ->
-            val hour = (15 + index) % 24
-            HourlyWeatherUiState(
-                time = "${hour.toString().padStart(2, '0')}:00",
-                hour = hour,
-                temperature = "${16 + index % 7}°C",
-                weatherCode = when (index % 6) {
-                    3 -> 2
-                    4 -> 61
-                    5 -> 3
-                    else -> 0
-                },
-            )
-        },
-        dailyForecasts = List(16) { index ->
-            DailyWeatherUiState(
-                date = LocalDate(2026, 10, index + 2),
-                isToday = index == 0,
-                highTemperature = "${19 + index % 5}°C",
-                lowTemperature = "${11 + index % 4}°C",
-                weatherCode = if (index % 5 == 3) 61 else 0,
-                precipitationProbability = if (index % 5 == 3) 40 else 10,
-            )
-        },
+        hourly =
+            List(24) { index ->
+                val hour = (15 + index) % 24
+                HourlyWeatherUiState(
+                    time = "${hour.toString().padStart(2, '0')}:00",
+                    hour = hour,
+                    temperature = "${16 + index % 7}°C",
+                    weatherCode =
+                        when (index % 6) {
+                            3 -> 2
+                            4 -> 61
+                            5 -> 3
+                            else -> 0
+                        },
+                )
+            },
+        dailyForecasts =
+            List(16) { index ->
+                DailyWeatherUiState(
+                    date = LocalDate(2026, 10, index + 2),
+                    isToday = index == 0,
+                    highTemperature = "${19 + index % 5}°C",
+                    lowTemperature = "${11 + index % 4}°C",
+                    weatherCode = if (index % 5 == 3) 61 else 0,
+                    precipitationProbability = if (index % 5 == 3) 40 else 10,
+                )
+            },
     )
 
 @Preview(name = "Success - Light", widthDp = 420, heightDp = 1100, showBackground = true)

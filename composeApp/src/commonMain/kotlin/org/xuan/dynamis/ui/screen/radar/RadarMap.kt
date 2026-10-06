@@ -63,21 +63,23 @@ internal fun RadarMap(
         // The native ornaments (compass, scale, logo) ignore the safe area and slide under the camera
         // cutout and status bar. Rotation is locked so the compass is moot, and the attribution
         // is shown in our own UI instead.
-        options = MapOptions(
-            gestureOptions = if (interactive) GestureOptions.RotationLocked else GestureOptions.AllDisabled,
-            ornamentOptions = OrnamentOptions.AllDisabled,
-        ),
+        options =
+            MapOptions(
+                gestureOptions = if (interactive) GestureOptions.RotationLocked else GestureOptions.AllDisabled,
+                ornamentOptions = OrnamentOptions.AllDisabled,
+            ),
     ) {
         if (state.showCoverage) CoverageLayer(state.frames.first().host)
         // Hidden layers still fetch tiles for the whole viewport, so mounting every frame means
         // each pan requests ~13x the tiles. Only the animation needs them all; otherwise keep the
         // selected frame and its neighbours so scrubbing stays smooth.
         state.frames.forEachIndexed { index, frame ->
-            val mounted = if (interactive) {
-                state.isPlaying || abs(index - state.selectedIndex) <= 1
-            } else {
-                index == state.selectedIndex
-            }
+            val mounted =
+                if (interactive) {
+                    state.isPlaying || abs(index - state.selectedIndex) <= 1
+                } else {
+                    index == state.selectedIndex
+                }
             if (mounted) RadarFrameLayer(frame, state.tileOptions, visible = index == state.selectedIndex)
         }
         state.center?.let { LocationDot(it, locationColor) }
@@ -87,23 +89,29 @@ internal fun RadarMap(
 @Composable
 @MaplibreComposable
 private fun CoverageLayer(host: String) {
-    val source = rememberRasterSource(
-        tiles = listOf(radarCoverageTileUrl(host)),
-        options = TileSetOptions(maxZoom = ApiConstants.RadarTiles.MAX_ZOOM),
-        tileSize = ApiConstants.RadarTiles.SIZE,
-    )
+    val source =
+        rememberRasterSource(
+            tiles = listOf(radarCoverageTileUrl(host)),
+            options = TileSetOptions(maxZoom = ApiConstants.RadarTiles.MAX_ZOOM),
+            tileSize = ApiConstants.RadarTiles.SIZE,
+        )
     // The docs warn coverage tiles are faint on light backgrounds, so don't dim them further.
     RasterLayer(id = "radar-coverage", source = source)
 }
 
 @Composable
 @MaplibreComposable
-private fun RadarFrameLayer(frame: RadarFrame, options: RadarTileOptions, visible: Boolean) {
-    val source = rememberRasterSource(
-        tiles = listOf(radarTileUrl(frame, options)),
-        options = TileSetOptions(maxZoom = ApiConstants.RadarTiles.MAX_ZOOM),
-        tileSize = ApiConstants.RadarTiles.SIZE,
-    )
+private fun RadarFrameLayer(
+    frame: RadarFrame,
+    options: RadarTileOptions,
+    visible: Boolean,
+) {
+    val source =
+        rememberRasterSource(
+            tiles = listOf(radarTileUrl(frame, options)),
+            options = TileSetOptions(maxZoom = ApiConstants.RadarTiles.MAX_ZOOM),
+            tileSize = ApiConstants.RadarTiles.SIZE,
+        )
     RasterLayer(
         // The options are part of the id because changing them swaps the layer's source.
         id = "radar-${frame.epochSeconds}-${options.smooth}-${options.snow}",
@@ -117,10 +125,14 @@ private fun RadarFrameLayer(frame: RadarFrame, options: RadarTileOptions, visibl
 
 @Composable
 @MaplibreComposable
-private fun LocationDot(location: GeoCoordinates, color: Color) {
-    val source = rememberGeoJsonSource(
-        GeoJsonData.JsonString("""{"type":"Point","coordinates":[${location.longitude},${location.latitude}]}"""),
-    )
+private fun LocationDot(
+    location: GeoCoordinates,
+    color: Color,
+) {
+    val source =
+        rememberGeoJsonSource(
+            GeoJsonData.JsonString("""{"type":"Point","coordinates":[${location.longitude},${location.latitude}]}"""),
+        )
     CircleLayer(id = "location-halo", source = source, color = const(color), opacity = const(0.25f), radius = const(16.dp))
     CircleLayer(
         id = "location-dot",

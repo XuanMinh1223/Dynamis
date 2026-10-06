@@ -23,36 +23,37 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
-private val CodeSamples = listOf(
-    SymbolSample("0  Clear", 0),
-    SymbolSample("1  Mainly clear", 1),
-    SymbolSample("2  Partly cloudy", 2),
-    SymbolSample("3  Overcast", 3),
-    SymbolSample("45  Fog", 45),
-    SymbolSample("48  Rime fog", 48),
-    SymbolSample("51  Light drizzle", 51),
-    SymbolSample("53  Drizzle", 53),
-    SymbolSample("55  Heavy drizzle", 55),
-    SymbolSample("56  Freezing drizzle", 56),
-    SymbolSample("57  Dense freezing drizzle", 57),
-    SymbolSample("61  Light rain", 61),
-    SymbolSample("63  Rain", 63),
-    SymbolSample("65  Heavy rain", 65),
-    SymbolSample("66  Freezing rain", 66),
-    SymbolSample("67  Heavy freezing rain", 67),
-    SymbolSample("71  Light snow", 71),
-    SymbolSample("73  Snow", 73),
-    SymbolSample("75  Heavy snow", 75),
-    SymbolSample("77  Snow grains", 77),
-    SymbolSample("80  Light rain showers", 80),
-    SymbolSample("81  Rain showers", 81),
-    SymbolSample("82  Heavy rain showers", 82),
-    SymbolSample("85  Snow showers", 85),
-    SymbolSample("86  Heavy snow showers", 86),
-    SymbolSample("95  Thunderstorm", 95),
-    SymbolSample("96  Thunder and hail", 96),
-    SymbolSample("99  Heavy hailstorm", 99),
-)
+private val CodeSamples =
+    listOf(
+        SymbolSample("0  Clear", 0),
+        SymbolSample("1  Mainly clear", 1),
+        SymbolSample("2  Partly cloudy", 2),
+        SymbolSample("3  Overcast", 3),
+        SymbolSample("45  Fog", 45),
+        SymbolSample("48  Rime fog", 48),
+        SymbolSample("51  Light drizzle", 51),
+        SymbolSample("53  Drizzle", 53),
+        SymbolSample("55  Heavy drizzle", 55),
+        SymbolSample("56  Freezing drizzle", 56),
+        SymbolSample("57  Dense freezing drizzle", 57),
+        SymbolSample("61  Light rain", 61),
+        SymbolSample("63  Rain", 63),
+        SymbolSample("65  Heavy rain", 65),
+        SymbolSample("66  Freezing rain", 66),
+        SymbolSample("67  Heavy freezing rain", 67),
+        SymbolSample("71  Light snow", 71),
+        SymbolSample("73  Snow", 73),
+        SymbolSample("75  Heavy snow", 75),
+        SymbolSample("77  Snow grains", 77),
+        SymbolSample("80  Light rain showers", 80),
+        SymbolSample("81  Rain showers", 81),
+        SymbolSample("82  Heavy rain showers", 82),
+        SymbolSample("85  Snow showers", 85),
+        SymbolSample("86  Heavy snow showers", 86),
+        SymbolSample("95  Thunderstorm", 95),
+        SymbolSample("96  Thunder and hail", 96),
+        SymbolSample("99  Heavy hailstorm", 99),
+    )
 
 @Preview(name = "Paper symbols - Sky and fog", widthDp = 420, heightDp = 720)
 @Composable
@@ -85,8 +86,11 @@ private fun PaperSnowflakeCutoutsPreview() {
                     val y = cellHeight * (design / 3 + 0.5f)
                     drawCutPaperSnowflake(
                         point = { px, py -> Offset(px, py) },
-                        x = x, y = y, radius = min(cellWidth, cellHeight) * 0.31f,
-                        design = design, unit = 1f,
+                        x = x,
+                        y = y,
+                        radius = min(cellWidth, cellHeight) * 0.31f,
+                        design = design,
+                        unit = 1f,
                     )
                 }
             }
@@ -103,29 +107,37 @@ private fun PaperThunderstormPreview() {
 @Preview(name = "Paper symbols - Night", widthDp = 420, heightDp = 920)
 @Composable
 private fun PaperWeatherSymbolsNightPreview() {
-    SymbolGallery(CodeSamples.filter { it.code in listOf(0, 2, 3, 48, 63, 73, 95, 99) },
-        TimeOfDay.Night)
+    SymbolGallery(
+        CodeSamples.filter { it.code in listOf(0, 2, 3, 48, 63, 73, 95, 99) },
+        TimeOfDay.Night,
+    )
 }
 
 @Preview(name = "Paper moon phases", widthDp = 420, heightDp = 920)
 @Composable
 private fun PaperMoonPhasesPreview() {
-    val phases = listOf(
-        "New" to 0f,
-        "Waxing crescent" to 0.125f,
-        "First quarter" to 0.25f,
-        "Waxing gibbous" to 0.375f,
-        "Full" to 0.5f,
-        "Waning gibbous" to 0.625f,
-        "Last quarter" to 0.75f,
-        "Waning crescent" to 0.875f,
+    val phases =
+        listOf(
+            "New" to 0f,
+            "Waxing crescent" to 0.125f,
+            "First quarter" to 0.25f,
+            "Waxing gibbous" to 0.375f,
+            "Full" to 0.5f,
+            "Waning gibbous" to 0.625f,
+            "Last quarter" to 0.75f,
+            "Waning crescent" to 0.875f,
+        )
+    SymbolGallery(
+        phases.map { (name, phase) -> SymbolSample(name, 0, phase) },
+        TimeOfDay.Night,
     )
-    SymbolGallery(phases.map { (name, phase) -> SymbolSample(name, 0, phase) },
-        TimeOfDay.Night)
 }
 
 @Composable
-private fun SymbolGallery(samples: List<SymbolSample>, timeOfDay: TimeOfDay) {
+private fun SymbolGallery(
+    samples: List<SymbolSample>,
+    timeOfDay: TimeOfDay,
+) {
     DynamisTheme(darkTheme = timeOfDay == TimeOfDay.Night) {
         Column(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
@@ -136,11 +148,14 @@ private fun SymbolGallery(samples: List<SymbolSample>, timeOfDay: TimeOfDay) {
                     rowSamples.forEach { sample ->
                         Box(Modifier.weight(1f).height(210.dp).clip(RoundedCornerShape(18.dp))) {
                             WeatherMeshGradientBackground(
-                                WeatherPattern.fromWeatherCode(sample.code), timeOfDay,
+                                WeatherPattern.fromWeatherCode(sample.code),
+                                timeOfDay,
                             ) {
                                 Box(Modifier.fillMaxSize()) {
                                     WeatherPaperSymbol(
-                                        sample.code, timeOfDay, sample.moonPhase,
+                                        sample.code,
+                                        timeOfDay,
+                                        sample.moonPhase,
                                         modifier = Modifier.align(Alignment.Center),
                                     )
                                     Text(

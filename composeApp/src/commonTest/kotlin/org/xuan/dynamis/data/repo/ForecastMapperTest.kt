@@ -1,22 +1,23 @@
 package org.xuan.dynamis.data.repo
 
+import kotlinx.datetime.LocalDateTime
 import org.xuan.dynamis.data.source.api.dto.Current
 import org.xuan.dynamis.data.source.api.dto.CurrentUnits
 import org.xuan.dynamis.data.source.api.dto.Daily
 import org.xuan.dynamis.data.source.api.dto.ForecastResponse
-import kotlinx.datetime.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class ForecastMapperTest {
-    private fun response() = ForecastResponse(
-        timezone = "America/Los_Angeles",
-        currentUnits = CurrentUnits("°C"),
-        current = Current("2026-09-30T23:45", 18.4, 3),
-        daily = Daily(listOf("2026-09-29", "2026-09-30"), listOf(25.0, 22.0), listOf(15.0, 12.0)),
-    )
+    private fun response() =
+        ForecastResponse(
+            timezone = "America/Los_Angeles",
+            currentUnits = CurrentUnits("°C"),
+            current = Current("2026-09-30T23:45", 18.4, 3),
+            daily = Daily(listOf("2026-09-29", "2026-09-30"), listOf(25.0, 22.0), listOf(15.0, 12.0)),
+        )
 
     @Test
     fun matchesDailyTemperaturesUsingForecastLocalDate() {
@@ -30,16 +31,18 @@ class ForecastMapperTest {
 
     @Test
     fun missingDateLeavesDailyTemperaturesUnavailable() {
-        val forecast = response().copy(daily = Daily(listOf("2026-10-01"), listOf(22.0), listOf(12.0)))
-            .toWeatherForecast()
+        val forecast =
+            response().copy(daily = Daily(listOf("2026-10-01"), listOf(22.0), listOf(12.0)))
+                .toWeatherForecast()
         assertNull(forecast.todayHigh)
         assertNull(forecast.todayLow)
     }
 
     @Test
     fun shortOrNullDailyArraysDoNotCrash() {
-        val forecast = response().copy(daily = Daily(listOf("2026-09-30"), listOf(null), emptyList()))
-            .toWeatherForecast()
+        val forecast =
+            response().copy(daily = Daily(listOf("2026-09-30"), listOf(null), emptyList()))
+                .toWeatherForecast()
         assertNull(forecast.todayHigh)
         assertNull(forecast.todayLow)
     }

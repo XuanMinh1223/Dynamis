@@ -50,15 +50,17 @@ fun RadarPreviewCard(
         shadowElevation = 4.dp,
     ) {
         when (state) {
-            RadarUiState.Loading -> Message {
-                CircularProgressIndicator()
-                Text(stringResource(Res.string.radar_loading))
-            }
+            RadarUiState.Loading ->
+                Message {
+                    CircularProgressIndicator()
+                    Text(stringResource(Res.string.radar_loading))
+                }
 
-            RadarUiState.Error -> Message {
-                Text(stringResource(Res.string.radar_unavailable), textAlign = TextAlign.Center)
-                Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
-            }
+            RadarUiState.Error ->
+                Message {
+                    Text(stringResource(Res.string.radar_unavailable), textAlign = TextAlign.Center)
+                    Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+                }
 
             is RadarUiState.Ready -> ReadyPreview(state, onOpen)
         }
@@ -66,7 +68,10 @@ fun RadarPreviewCard(
 }
 
 @Composable
-private fun ReadyPreview(state: RadarUiState.Ready, onOpen: () -> Unit) {
+private fun ReadyPreview(
+    state: RadarUiState.Ready,
+    onOpen: () -> Unit,
+) {
     val cameraState = rememberCameraState(firstPosition = radarCameraPosition(state.center))
     val description = stringResource(Res.string.open_radar)
     Box(Modifier.fillMaxSize()) {
@@ -83,8 +88,9 @@ private fun ReadyPreview(state: RadarUiState.Ready, onOpen: () -> Unit) {
             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
         ) {
             Text(
-                text = "${stringResource(Res.string.radar)} · " +
-                    stringResource(Res.string.radar_latest_scan, formatRadarTime(state.selectedFrame.epochSeconds)),
+                text =
+                    "${stringResource(Res.string.radar)} · " +
+                        stringResource(Res.string.radar_latest_scan, formatRadarTime(state.selectedFrame.epochSeconds)),
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             )

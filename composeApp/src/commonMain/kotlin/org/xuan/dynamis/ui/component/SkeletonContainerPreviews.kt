@@ -22,7 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-private fun PreviewCard(isLoading: Boolean, index: Int? = null) {
+private fun PreviewCard(
+    isLoading: Boolean,
+    index: Int? = null,
+) {
     SkeletonContainer(
         isLoading = isLoading,
         modifier = Modifier.fillMaxWidth().height(72.dp),

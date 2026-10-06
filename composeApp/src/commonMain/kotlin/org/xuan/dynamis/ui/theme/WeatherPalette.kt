@@ -24,28 +24,30 @@ enum class WeatherPattern(
     RainShowers(skyPalette(0xFF245A7F, 0xFF86BAC8, 0xFF4D91A7, 0xFF203E60), sunlight = 0.5f),
     SnowShowers(skyPalette(0xFF526B8F, 0xFFBECDDF, 0xFF8FA7C7, 0xFF334A6D), sunlight = 0.4f),
     Thunderstorm(skyPalette(0xFF363954, 0xFF7A7697, 0xFF535573, 0xFF1D243B), sunlight = 0.05f),
-    Unknown(skyPalette(0xFF546F88, 0xFF9AB6C7, 0xFF7D96A9, 0xFF354D66), sunlight = 0.45f);
+    Unknown(skyPalette(0xFF546F88, 0xFF9AB6C7, 0xFF7D96A9, 0xFF354D66), sunlight = 0.45f),
+    ;
 
     val displayName: String
         get() = name.replace(Regex("([a-z])([A-Z])"), "\$1 \$2")
 
     companion object {
-        fun fromWeatherCode(code: Int?): WeatherPattern = when (code) {
-            0 -> ClearSky
-            1 -> MainlyClear
-            2 -> PartlyCloudy
-            3 -> Overcast
-            45, 48 -> Fog
-            51, 53, 55 -> Drizzle
-            56, 57 -> FreezingDrizzle
-            61, 63, 65 -> Rain
-            66, 67 -> FreezingRain
-            71, 73, 75, 77 -> Snowfall
-            80, 81, 82 -> RainShowers
-            85, 86 -> SnowShowers
-            95, 96, 99 -> Thunderstorm
-            else -> Unknown
-        }
+        fun fromWeatherCode(code: Int?): WeatherPattern =
+            when (code) {
+                0 -> ClearSky
+                1 -> MainlyClear
+                2 -> PartlyCloudy
+                3 -> Overcast
+                45, 48 -> Fog
+                51, 53, 55 -> Drizzle
+                56, 57 -> FreezingDrizzle
+                61, 63, 65 -> Rain
+                66, 67 -> FreezingRain
+                71, 73, 75, 77 -> Snowfall
+                80, 81, 82 -> RainShowers
+                85, 86 -> SnowShowers
+                95, 96, 99 -> Thunderstorm
+                else -> Unknown
+            }
     }
 }
 
@@ -53,16 +55,18 @@ enum class TimeOfDay {
     Dawn,
     Day,
     Dusk,
-    Night;
+    Night,
+    ;
 
     companion object {
         /** Uses the location's local observation hour. */
-        fun fromHour(hour: Int): TimeOfDay = when (hour) {
-            in 5..7 -> Dawn
-            in 8..16 -> Day
-            in 17..19 -> Dusk
-            else -> Night
-        }
+        fun fromHour(hour: Int): TimeOfDay =
+            when (hour) {
+                in 5..7 -> Dawn
+                in 8..16 -> Day
+                in 17..19 -> Dusk
+                else -> Night
+            }
     }
 }
 
@@ -75,30 +79,36 @@ data class WeatherColorPalette(
     val foreground: Color,
 )
 
-val LocalWeatherColorPalette = staticCompositionLocalOf {
-    weatherColorPalette(WeatherPattern.Unknown, TimeOfDay.Day)
-}
+val LocalWeatherColorPalette =
+    staticCompositionLocalOf {
+        weatherColorPalette(WeatherPattern.Unknown, TimeOfDay.Day)
+    }
 
 /** Weather defines the sky; local time tints its atmosphere and horizon. */
-fun weatherColorPalette(pattern: WeatherPattern, timeOfDay: TimeOfDay): WeatherColorPalette {
+fun weatherColorPalette(
+    pattern: WeatherPattern,
+    timeOfDay: TimeOfDay,
+): WeatherColorPalette {
     val daylight = pattern.daylightPalette
     val sunlight = pattern.sunlight
     return when (timeOfDay) {
         TimeOfDay.Day -> daylight
-        TimeOfDay.Dawn -> daylight.copy(
-            background = lerp(daylight.background, Color(0xFF5C5F91), 0.5f),
-            glow = lerp(daylight.glow, Color(0xFFFFB270), 0.1f + sunlight * 0.8f),
-            shadow = lerp(daylight.shadow, Color(0xFF343B67), 0.5f),
-            weatherPrimary = lerp(daylight.weatherPrimary, Color(0xFF8685B1), 0.45f),
-            weatherSecondary = lerp(daylight.weatherSecondary, Color(0xFFECA46B), sunlight * 0.9f),
-        )
-        TimeOfDay.Dusk -> daylight.copy(
-            background = lerp(daylight.background, Color(0xFF51476E), 0.7f),
-            glow = lerp(daylight.glow, Color(0xFFFF814D), 0.08f + sunlight * 0.85f),
-            shadow = lerp(daylight.shadow, Color(0xFF2C2C52), 0.65f),
-            weatherPrimary = lerp(daylight.weatherPrimary, Color(0xFF7C6593), 0.6f),
-            weatherSecondary = lerp(daylight.weatherSecondary, Color(0xFFED8C8C), 0.1f + sunlight * 0.85f),
-        )
+        TimeOfDay.Dawn ->
+            daylight.copy(
+                background = lerp(daylight.background, Color(0xFF5C5F91), 0.5f),
+                glow = lerp(daylight.glow, Color(0xFFFFB270), 0.1f + sunlight * 0.8f),
+                shadow = lerp(daylight.shadow, Color(0xFF343B67), 0.5f),
+                weatherPrimary = lerp(daylight.weatherPrimary, Color(0xFF8685B1), 0.45f),
+                weatherSecondary = lerp(daylight.weatherSecondary, Color(0xFFECA46B), sunlight * 0.9f),
+            )
+        TimeOfDay.Dusk ->
+            daylight.copy(
+                background = lerp(daylight.background, Color(0xFF51476E), 0.7f),
+                glow = lerp(daylight.glow, Color(0xFFFF814D), 0.08f + sunlight * 0.85f),
+                shadow = lerp(daylight.shadow, Color(0xFF2C2C52), 0.65f),
+                weatherPrimary = lerp(daylight.weatherPrimary, Color(0xFF7C6593), 0.6f),
+                weatherSecondary = lerp(daylight.weatherSecondary, Color(0xFFED8C8C), 0.1f + sunlight * 0.85f),
+            )
         TimeOfDay.Night -> {
             // Retain the weather's hue as the sky darkens to midnight.
             val midnight = lerp(daylight.shadow, Color(0xFF020818), 0.8f)
@@ -113,7 +123,12 @@ fun weatherColorPalette(pattern: WeatherPattern, timeOfDay: TimeOfDay): WeatherC
     }
 }
 
-private fun skyPalette(sky: Long, horizon: Long, cloud: Long, shade: Long) = WeatherColorPalette(
+private fun skyPalette(
+    sky: Long,
+    horizon: Long,
+    cloud: Long,
+    shade: Long,
+) = WeatherColorPalette(
     background = Color(sky),
     glow = Color(horizon),
     shadow = Color(shade),

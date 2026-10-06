@@ -7,8 +7,10 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.Platform
 
 @OptIn(ExperimentalNativeApi::class)
-fun MainViewController() = run {
-    configureLogging(isDebug = Platform.isDebugBinary)
-    initKoin()
-    ComposeUIViewController { App() }
-}
+@Suppress("ktlint:standard:function-naming") // Called by name from Swift.
+fun MainViewController() =
+    run {
+        configureLogging(isDebug = Platform.isDebugBinary)
+        initKoin()
+        ComposeUIViewController { App() }
+    }

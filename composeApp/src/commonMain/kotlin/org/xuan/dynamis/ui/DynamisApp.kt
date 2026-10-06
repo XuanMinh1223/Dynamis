@@ -8,21 +8,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
 import org.xuan.dynamis.ui.screen.home.HomeRoute
 import org.xuan.dynamis.ui.screen.radar.RadarRoute
 import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherPattern
-import kotlinx.serialization.Serializable
 
 @Composable
-fun DynamisApp(
-    navController: NavHostController = rememberNavController()
-) {
+fun DynamisApp(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
         startDestination = HomeDestination,
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
         composable<HomeDestination> {
             HomeRoute(

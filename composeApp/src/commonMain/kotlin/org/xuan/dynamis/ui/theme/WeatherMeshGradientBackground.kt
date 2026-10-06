@@ -68,22 +68,28 @@ private fun animateWeatherColorPalette(target: WeatherColorPalette): WeatherColo
     val transition = updateTransition(targetState = target, label = "Weather palette")
     val animationSpec = tween<Color>(durationMillis = 1_200, easing = FastOutSlowInEasing)
     val background by transition.animateColor(
-        transitionSpec = { animationSpec }, label = "Background",
+        transitionSpec = { animationSpec },
+        label = "Background",
     ) { it.background }
     val glow by transition.animateColor(
-        transitionSpec = { animationSpec }, label = "Glow",
+        transitionSpec = { animationSpec },
+        label = "Glow",
     ) { it.glow }
     val shadow by transition.animateColor(
-        transitionSpec = { animationSpec }, label = "Shadow",
+        transitionSpec = { animationSpec },
+        label = "Shadow",
     ) { it.shadow }
     val weatherPrimary by transition.animateColor(
-        transitionSpec = { animationSpec }, label = "Weather primary",
+        transitionSpec = { animationSpec },
+        label = "Weather primary",
     ) { it.weatherPrimary }
     val weatherSecondary by transition.animateColor(
-        transitionSpec = { animationSpec }, label = "Weather secondary",
+        transitionSpec = { animationSpec },
+        label = "Weather secondary",
     ) { it.weatherSecondary }
     val foreground by transition.animateColor(
-        transitionSpec = { animationSpec }, label = "Foreground",
+        transitionSpec = { animationSpec },
+        label = "Foreground",
     ) { it.foreground }
 
     return WeatherColorPalette(background, glow, shadow, weatherPrimary, weatherSecondary, foreground)
@@ -95,14 +101,16 @@ private fun DrawScope.drawRadialBloom(
     radius: Float,
 ) {
     drawRect(
-        brush = Brush.radialGradient(
-            colorStops = arrayOf(
-                0f to color.copy(alpha = 0.88f),
-                0.48f to color.copy(alpha = 0.4f),
-                1f to Color.Transparent,
+        brush =
+            Brush.radialGradient(
+                colorStops =
+                    arrayOf(
+                        0f to color.copy(alpha = 0.88f),
+                        0.48f to color.copy(alpha = 0.4f),
+                        1f to Color.Transparent,
+                    ),
+                center = center,
+                radius = radius,
             ),
-            center = center,
-            radius = radius,
-        ),
     )
 }

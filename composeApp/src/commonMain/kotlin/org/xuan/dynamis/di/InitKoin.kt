@@ -5,6 +5,7 @@ import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
 
 /** Initialize once per application process, independently of UI composition. */
-fun initKoin(): Koin = KoinPlatform.getKoinOrNull() ?: startKoin {
-    modules(appModule)
-}.koin
+fun initKoin(): Koin =
+    KoinPlatform.getKoinOrNull() ?: startKoin {
+        modules(appModule)
+    }.koin

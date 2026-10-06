@@ -68,9 +68,14 @@ class CompassLocationProvider(
                 result
             }
 
-            is GeolocatorResult.Success if result.data.isRecent() -> {
-                log.d { "Using the OS's last known location" }
-                result
+            is GeolocatorResult.Success -> {
+                if (result.data.isRecent()) {
+                    log.d { "Using the OS's last known location" }
+                    result
+                } else {
+                    log.d { "No usable last known location (too old); requesting a fresh fix" }
+                    null
+                }
             }
 
             else -> {

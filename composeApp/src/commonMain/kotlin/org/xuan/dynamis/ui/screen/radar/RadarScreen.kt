@@ -1,5 +1,6 @@
 package org.xuan.dynamis.ui.screen.radar
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -92,19 +92,25 @@ class RadarActions(
 
 /** The dedicated, fully interactive radar screen. */
 @Composable
-fun RadarScreen(state: RadarUiState, actions: RadarActions, modifier: Modifier = Modifier) {
+fun RadarScreen(
+    state: RadarUiState,
+    actions: RadarActions,
+    modifier: Modifier = Modifier,
+) {
     val palette = LocalWeatherColorPalette.current
     Surface(modifier = modifier.fillMaxSize(), color = palette.background, contentColor = palette.foreground) {
         when (state) {
-            RadarUiState.Loading -> CenteredMessage {
-                CircularProgressIndicator(color = palette.foreground)
-                Text(stringResource(Res.string.radar_loading))
-            }
+            RadarUiState.Loading ->
+                CenteredMessage {
+                    CircularProgressIndicator(color = palette.foreground)
+                    Text(stringResource(Res.string.radar_loading))
+                }
 
-            RadarUiState.Error -> CenteredMessage {
-                Text(stringResource(Res.string.radar_unavailable), textAlign = TextAlign.Center)
-                Button(onClick = actions.onRetry) { Text(stringResource(Res.string.retry)) }
-            }
+            RadarUiState.Error ->
+                CenteredMessage {
+                    Text(stringResource(Res.string.radar_unavailable), textAlign = TextAlign.Center)
+                    Button(onClick = actions.onRetry) { Text(stringResource(Res.string.retry)) }
+                }
 
             is RadarUiState.Ready -> ReadyRadar(state, actions, palette)
         }
@@ -118,7 +124,11 @@ fun RadarScreen(state: RadarUiState, actions: RadarActions, modifier: Modifier =
 }
 
 @Composable
-private fun ReadyRadar(state: RadarUiState.Ready, actions: RadarActions, palette: WeatherColorPalette) {
+private fun ReadyRadar(
+    state: RadarUiState.Ready,
+    actions: RadarActions,
+    palette: WeatherColorPalette,
+) {
     val cameraState = rememberCameraState(firstPosition = radarCameraPosition(state.center))
     val scope = rememberCoroutineScope()
     Box(Modifier.fillMaxSize()) {
@@ -160,7 +170,11 @@ private fun CenteredMessage(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun BackButton(onBack: () -> Unit, palette: WeatherColorPalette, modifier: Modifier = Modifier) {
+private fun BackButton(
+    onBack: () -> Unit,
+    palette: WeatherColorPalette,
+    modifier: Modifier = Modifier,
+) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(50),
@@ -191,9 +205,10 @@ private fun RadarControls(
                 IconButton(onClick = actions.onTogglePlayback) {
                     Icon(
                         imageVector = if (state.isPlaying) PauseIcon else Icons.Rounded.PlayArrow,
-                        contentDescription = stringResource(
-                            if (state.isPlaying) Res.string.radar_pause else Res.string.radar_play,
-                        ),
+                        contentDescription =
+                            stringResource(
+                                if (state.isPlaying) Res.string.radar_pause else Res.string.radar_play,
+                            ),
                     )
                 }
                 val timelineDescription = stringResource(Res.string.radar_timeline)
@@ -202,22 +217,24 @@ private fun RadarControls(
                     onValueChange = { actions.onSelectFrame(it.toInt()) },
                     valueRange = 0f..state.frames.lastIndex.toFloat().coerceAtLeast(1f),
                     steps = (state.frames.size - 2).coerceAtLeast(0),
-                    colors = SliderDefaults.colors(
-                        thumbColor = palette.foreground,
-                        activeTrackColor = palette.foreground,
-                        inactiveTrackColor = palette.foreground.copy(alpha = 0.3f),
-                        activeTickColor = palette.shadow,
-                        inactiveTickColor = palette.foreground.copy(alpha = 0.5f),
-                    ),
+                    colors =
+                        SliderDefaults.colors(
+                            thumbColor = palette.foreground,
+                            activeTrackColor = palette.foreground,
+                            inactiveTrackColor = palette.foreground.copy(alpha = 0.3f),
+                            activeTickColor = palette.shadow,
+                            inactiveTickColor = palette.foreground.copy(alpha = 0.5f),
+                        ),
                     modifier = Modifier.weight(1f).semantics { contentDescription = timelineDescription },
                 )
                 val label = formatRadarTime(state.selectedFrame.epochSeconds)
                 Text(
-                    text = if (state.selectedFrame.isForecast) {
-                        stringResource(Res.string.radar_forecast_frame, label)
-                    } else {
-                        label
-                    },
+                    text =
+                        if (state.selectedFrame.isForecast) {
+                            stringResource(Res.string.radar_forecast_frame, label)
+                        } else {
+                            label
+                        },
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(end = 8.dp),
                 )
@@ -231,10 +248,11 @@ private fun RadarControls(
                 OptionChip(stringResource(Res.string.radar_coverage), state.showCoverage, palette, actions.onCoverageChange)
             }
             Text(
-                text = stringResource(
-                    Res.string.radar_latest_scan,
-                    formatRadarTime((state.frames.lastOrNull { !it.isForecast } ?: state.frames.last()).epochSeconds),
-                ) + " · " + stringResource(Res.string.radar_attribution),
+                text =
+                    stringResource(
+                        Res.string.radar_latest_scan,
+                        formatRadarTime((state.frames.lastOrNull { !it.isForecast } ?: state.frames.last()).epochSeconds),
+                    ) + " · " + stringResource(Res.string.radar_attribution),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             )
@@ -243,15 +261,21 @@ private fun RadarControls(
 }
 
 @Composable
-private fun OptionChip(label: String, selected: Boolean, palette: WeatherColorPalette, onChange: (Boolean) -> Unit) {
+private fun OptionChip(
+    label: String,
+    selected: Boolean,
+    palette: WeatherColorPalette,
+    onChange: (Boolean) -> Unit,
+) {
     FilterChip(
         selected = selected,
         onClick = { onChange(!selected) },
         label = { Text(label) },
-        colors = FilterChipDefaults.filterChipColors(
-            labelColor = palette.foreground,
-            selectedLabelColor = palette.foreground,
-            selectedContainerColor = palette.foreground.copy(alpha = 0.28f),
-        ),
+        colors =
+            FilterChipDefaults.filterChipColors(
+                labelColor = palette.foreground,
+                selectedLabelColor = palette.foreground,
+                selectedContainerColor = palette.foreground.copy(alpha = 0.28f),
+            ),
     )
 }

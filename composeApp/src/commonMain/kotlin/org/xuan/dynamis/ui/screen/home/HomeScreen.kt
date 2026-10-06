@@ -53,9 +53,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 import org.jetbrains.compose.resources.stringResource
 import org.xuan.dynamis.resources.Res
 import org.xuan.dynamis.resources.current_location
@@ -86,6 +83,9 @@ import org.xuan.dynamis.ui.theme.TimeOfDay
 import org.xuan.dynamis.ui.theme.WeatherMeshGradientBackground
 import org.xuan.dynamis.ui.theme.WeatherPaperSymbol
 import org.xuan.dynamis.ui.theme.WeatherPattern
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun HomeScreen(
@@ -173,7 +173,11 @@ fun HomeScreen(
 }
 
 @Composable
-private fun WeatherContent(weather: WeatherUiState, isLoading: Boolean, radarContent: @Composable () -> Unit) {
+private fun WeatherContent(
+    weather: WeatherUiState,
+    isLoading: Boolean,
+    radarContent: @Composable () -> Unit,
+) {
     val loadingDescription = stringResource(Res.string.loading_weather)
     val textShape = RoundedCornerShape(6.dp)
     Column(
@@ -449,18 +453,43 @@ private fun PrecipitationIcon(snow: Boolean) {
                 )
             }
         } else {
-            val drop = Path().apply {
-                moveTo(centerX, 0f)
-                cubicTo(size.width * 0.34f, size.height * 0.38f, size.width * 0.1f, size.height * 0.57f,
-                    size.width * 0.1f, size.height * 0.72f)
-                cubicTo(size.width * 0.1f, size.height * 0.91f, size.width * 0.28f, size.height,
-                    centerX, size.height)
-                cubicTo(size.width * 0.72f, size.height, size.width * 0.9f, size.height * 0.91f,
-                    size.width * 0.9f, size.height * 0.72f)
-                cubicTo(size.width * 0.9f, size.height * 0.57f, size.width * 0.66f, size.height * 0.38f,
-                    centerX, 0f)
-                close()
-            }
+            val drop =
+                Path().apply {
+                    moveTo(centerX, 0f)
+                    cubicTo(
+                        size.width * 0.34f,
+                        size.height * 0.38f,
+                        size.width * 0.1f,
+                        size.height * 0.57f,
+                        size.width * 0.1f,
+                        size.height * 0.72f,
+                    )
+                    cubicTo(
+                        size.width * 0.1f,
+                        size.height * 0.91f,
+                        size.width * 0.28f,
+                        size.height,
+                        centerX,
+                        size.height,
+                    )
+                    cubicTo(
+                        size.width * 0.72f,
+                        size.height,
+                        size.width * 0.9f,
+                        size.height * 0.91f,
+                        size.width * 0.9f,
+                        size.height * 0.72f,
+                    )
+                    cubicTo(
+                        size.width * 0.9f,
+                        size.height * 0.57f,
+                        size.width * 0.66f,
+                        size.height * 0.38f,
+                        centerX,
+                        0f,
+                    )
+                    close()
+                }
             drawPath(drop, tint)
         }
     }

@@ -4,6 +4,7 @@ import org.xuan.dynamis.domain.model.GeoCoordinates
 
 interface LocationProvider {
     suspend fun currentLocation(): GeoCoordinates
+
     suspend fun locality(coordinates: GeoCoordinates): String?
 }
 

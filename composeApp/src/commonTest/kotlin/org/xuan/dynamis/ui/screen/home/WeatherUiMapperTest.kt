@@ -1,7 +1,7 @@
 package org.xuan.dynamis.ui.screen.home
 
-import org.xuan.dynamis.domain.model.WeatherForecast
 import kotlinx.datetime.LocalDateTime
+import org.xuan.dynamis.domain.model.WeatherForecast
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -24,13 +24,14 @@ class WeatherUiMapperTest {
         assertEquals("", state.locality)
     }
 
-    private fun forecast() = WeatherForecast(
-        observedAt = LocalDateTime(2026, 9, 30, 23, 5),
-        timeZone = "America/Los_Angeles",
-        temperature = 18.4,
-        temperatureUnit = "°C",
-        weatherCode = 3,
-        todayHigh = 21.6,
-        todayLow = -1.8,
-    )
+    private fun forecast() =
+        WeatherForecast(
+            observedAt = LocalDateTime(2026, 9, 30, 23, 5),
+            timeZone = "America/Los_Angeles",
+            temperature = 18.4,
+            temperatureUnit = "°C",
+            weatherCode = 3,
+            todayHigh = 21.6,
+            todayLow = -1.8,
+        )
 }

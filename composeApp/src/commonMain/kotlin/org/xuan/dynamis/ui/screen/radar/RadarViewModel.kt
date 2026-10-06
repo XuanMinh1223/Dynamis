@@ -1,8 +1,8 @@
 package org.xuan.dynamis.ui.screen.radar
 
 import androidx.lifecycle.ViewModel
-import co.touchlab.kermit.Logger
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -32,35 +32,38 @@ class RadarViewModel(
     fun load() {
         loadJob?.cancel()
         playJob?.cancel()
-        loadJob = viewModelScope.launch {
-            _uiState.value = RadarUiState.Loading
-            try {
-                val frames = repository.getRadarFrames()
-                if (frames.isEmpty()) {
-                    log.e { "Radar API returned no frames" }
-                    _uiState.value = RadarUiState.Error
-                    return@launch
-                }
-                // The map is still useful without a fix, so a location failure only loses the centring.
-                val center = runCatching { locationProvider.currentLocation() }
-                    .onFailure {
-                        if (it is CancellationException) throw it
-                        log.w(it) { "Radar centring unavailable: location request failed" }
+        loadJob =
+            viewModelScope.launch {
+                _uiState.value = RadarUiState.Loading
+                try {
+                    val frames = repository.getRadarFrames()
+                    if (frames.isEmpty()) {
+                        log.e { "Radar API returned no frames" }
+                        _uiState.value = RadarUiState.Error
+                        return@launch
                     }
-                    .getOrNull()
-                _uiState.value = RadarUiState.Ready(
-                    frames = frames,
-                    selectedIndex = frames.lastPastIndex(),
-                    isPlaying = false,
-                    center = center,
-                )
-            } catch (cause: CancellationException) {
-                throw cause
-            } catch (cause: Exception) {
-                log.e(cause) { "Radar load failed" }
-                _uiState.value = RadarUiState.Error
+                    // The map is still useful without a fix, so a location failure only loses the centring.
+                    val center =
+                        runCatching { locationProvider.currentLocation() }
+                            .onFailure {
+                                if (it is CancellationException) throw it
+                                log.w(it) { "Radar centring unavailable: location request failed" }
+                            }
+                            .getOrNull()
+                    _uiState.value =
+                        RadarUiState.Ready(
+                            frames = frames,
+                            selectedIndex = frames.lastPastIndex(),
+                            isPlaying = false,
+                            center = center,
+                        )
+                } catch (cause: CancellationException) {
+                    throw cause
+                } catch (cause: Exception) {
+                    log.e(cause) { "Radar load failed" }
+                    _uiState.value = RadarUiState.Error
+                }
             }
-        }
     }
 
     fun togglePlayback() {
@@ -70,21 +73,23 @@ class RadarViewModel(
             return
         }
         // Restart from the beginning when resuming on the last frame.
-        _uiState.value = state.copy(
-            isPlaying = true,
-            selectedIndex = if (state.selectedIndex == state.frames.lastIndex) 0 else state.selectedIndex,
-        )
+        _uiState.value =
+            state.copy(
+                isPlaying = true,
+                selectedIndex = if (state.selectedIndex == state.frames.lastIndex) 0 else state.selectedIndex,
+            )
         playJob?.cancel()
-        playJob = viewModelScope.launch {
-            while (isActive) {
-                delay(FRAME_DURATION_MILLIS)
-                _uiState.update { current ->
-                    if (current !is RadarUiState.Ready) return@update current
-                    val next = (current.selectedIndex + 1) % current.frames.size
-                    current.copy(selectedIndex = next)
+        playJob =
+            viewModelScope.launch {
+                while (isActive) {
+                    delay(FRAME_DURATION_MILLIS)
+                    _uiState.update { current ->
+                        if (current !is RadarUiState.Ready) return@update current
+                        val next = (current.selectedIndex + 1) % current.frames.size
+                        current.copy(selectedIndex = next)
+                    }
                 }
             }
-        }
     }
 
     fun selectFrame(index: Int) {
@@ -113,8 +118,7 @@ class RadarViewModel(
         _uiState.update { current -> if (current is RadarUiState.Ready) current.copy(isPlaying = false) else current }
     }
 
-    private fun List<RadarFrame>.lastPastIndex(): Int =
-        indexOfLast { !it.isForecast }.coerceAtLeast(0)
+    private fun List<RadarFrame>.lastPastIndex(): Int = indexOfLast { !it.isForecast }.coerceAtLeast(0)
 
     private companion object {
         const val FRAME_DURATION_MILLIS = 600L

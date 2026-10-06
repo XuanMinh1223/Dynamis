@@ -10,13 +10,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class RadarMapperTest {
-    private val response = RadarResponse(
-        host = "https://tilecache.rainviewer.com/",
-        radar = RadarFramesDto(
-            past = listOf(RadarFrameDto(100, "/v2/radar/a"), RadarFrameDto(50, "/v2/radar/b")),
-            nowcast = listOf(RadarFrameDto(200, "/v2/radar/c")),
-        ),
-    )
+    private val response =
+        RadarResponse(
+            host = "https://tilecache.rainviewer.com/",
+            radar =
+                RadarFramesDto(
+                    past = listOf(RadarFrameDto(100, "/v2/radar/a"), RadarFrameDto(50, "/v2/radar/b")),
+                    nowcast = listOf(RadarFrameDto(200, "/v2/radar/c")),
+                ),
+        )
 
     @Test
     fun buildsTileTemplateFromHostAndPath() {

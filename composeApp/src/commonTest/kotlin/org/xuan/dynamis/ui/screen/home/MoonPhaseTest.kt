@@ -17,9 +17,11 @@ class MoonPhaseTest {
     @Test
     fun usesTheForecastLocationTimeZone() {
         val utc = moonPhaseFraction(LocalDateTime(2024, 1, 11, 11, 57), "UTC")
-        val losAngeles = moonPhaseFraction(
-            LocalDateTime(2024, 1, 11, 3, 57), "America/Los_Angeles",
-        )
+        val losAngeles =
+            moonPhaseFraction(
+                LocalDateTime(2024, 1, 11, 3, 57),
+                "America/Los_Angeles",
+            )
 
         assertTrue(kotlin.math.abs(utc - losAngeles) < 0.0001f)
     }
